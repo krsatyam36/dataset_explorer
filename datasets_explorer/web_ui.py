@@ -325,6 +325,12 @@ main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
 .thinking-list details[open] summary{color:var(--accent-2);margin-bottom:6px}
 .thinking-list details pre{margin:0;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;white-space:pre-wrap;color:var(--text);max-height:280px;overflow:auto}
 
+.timeline{font-family:var(--mono);font-size:11px;padding:10px 14px}
+.timeline .tl-item{display:flex;gap:8px;padding:3px 0;align-items:flex-start;border-left:2px solid var(--border);padding-left:12px;margin-left:6px;position:relative}
+.timeline .tl-item::before{content:'';position:absolute;left:-7px;top:7px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--bg)}
+.timeline .tl-item .tl-time{color:var(--muted);font-size:10px;white-space:nowrap;min-width:80px}
+.timeline .tl-item .tl-name{color:var(--text);word-break:break-all}
+.timeline .tl-item .tl-score{color:var(--good);font-weight:700;min-width:30px;text-align:right}
 .sites{font-family:var(--mono);font-size:12px;padding:10px 14px;display:flex;flex-wrap:wrap;gap:6px}
 .sites .chip{background:var(--panel-2);border:1px solid var(--border);padding:3px 8px;border-radius:5px;color:var(--text);display:flex;align-items:center;gap:5px}
 .sites .chip .n{color:var(--muted);font-size:11px}
@@ -388,6 +394,13 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
   <div class="panel">
     <h2>Sites visited <span class="count" id="sites-count">0</span></h2>
     <div class="body"><div class="sites" id="sites"></div></div>
+  </div>
+</section>
+
+<section class="lower" style="margin-top:0;padding-top:0">
+  <div class="panel">
+    <h2>Discovery timeline <span class="count" id="tl-count">0</span></h2>
+    <div class="body"><div class="timeline" id="timeline"></div></div>
   </div>
 </section>
 
@@ -466,6 +479,21 @@ function setNow(ic, txt, meta){
     $('now-meta').textContent =
       `iter ${meta.iteration ?? '—'} · ${fmtElapsed(meta.elapsed)}`;
   }
+}
+
+function pushTimeline(d){
+  const tl = $('timeline');
+  if(!tl) return;
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString();
+  const score = (d.relevance_score ?? 0).toFixed(2);
+  const item = document.createElement('div');
+  item.className = 'tl-item';
+  item.innerHTML = `<span class="tl-score">${score}</span><span class="tl-time">${timeStr}</span><span class="tl-name">${escapeHtml(d.name||'')}</span>`;
+  tl.insertBefore(item, tl.firstChild);
+  const c = $('tl-count');
+  if(c) c.textContent = tl.childElementCount;
+  while(tl.childElementCount > 100) tl.removeChild(tl.lastChild);
 }
 
 function pushFinding(d){
@@ -604,8 +632,10 @@ function applyEvent(ev){
     $('kpi-stored').textContent = state.stored;
     if(ev.is_mainstream) state.mainstream += 1; else state.alternative += 1;
     $('kpi-ratio').textContent = `${state.mainstream} : ${state.alternative}`;
-    pushFinding(ev.dataset || {});
-    pushRow('store', '⭐', `[${(ev.dataset?.relevance_score ?? 0).toFixed(2)}] ${escapeHtml(ev.dataset?.name||'')}`, ev);
+    const ds = ev.dataset || {};
+    pushFinding(ds);
+    pushTimeline(ds);
+    pushRow('store', '⭐', `[${(ds.relevance_score ?? 0).toFixed(2)}] ${escapeHtml(ds.name||'')}`, ev);
     return;
   }
   if(ev.type === 'run_complete'){
