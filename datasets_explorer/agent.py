@@ -14,6 +14,7 @@ from .utils import RateLimiter, setup_logging
 from .config import (
     OLLAMA_HOST, OLLAMA_MODEL, OLLAMA_FALLBACK_MODELS,
     DEFAULT_HOURS, DEFAULT_DEPTH, DEPTH_ITERATION_CAPS, LOG_DIR, CSV_DIR,
+    FEDERATED_PARALLEL_QUERIES,
 )
 
 # Minimum datasets required before mark_search_complete is honored, by depth.
@@ -711,6 +712,16 @@ class DatasetDiscoveryAgent:
 
                 # Every N iterations, inject a progress reminder so the model
                 # doesn't drift, get stuck on one source, or wind down too early.
+                                if FEDERATED_PARALLEL_QUERIES > 1 and iteration == 1:
+                    messages.append({
+                        "role": "user",
+                        "content": (
+                            f"[federated mode] You may run up to {FEDERATED_PARALLEL_QUERIES} "
+                            f"parallel tool calls per iteration. Issue multiple independent "
+                            f"web_search calls (different sources/synonyms) in one turn."
+                        ),
+                    })
+
                 if iteration > 0 and iteration % PROGRESS_REMINDER_EVERY == 0 and not search_done:
                     stored_now = len(self.storage.get_datasets(query_id=query_id))
                     min_needed = DEPTH_MIN_DATASETS.get(depth, 25)

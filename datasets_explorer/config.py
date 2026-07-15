@@ -67,3 +67,6 @@ PORTAL_HOSTS = (
     "data.gov", "catalog.data.gov", "registry.opendata.aws",
     "european-data.europa.eu", "data.gov.uk", "data.gc.ca",
 )
+
+# Federated search: number of parallel queries to suggest the agent runs concurrently.
+FEDERATED_PARALLEL_QUERIES = int(os.environ.get("FEDERATED_PARALLEL_QUERIES", "1"))
