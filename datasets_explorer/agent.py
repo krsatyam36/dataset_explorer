@@ -1,5 +1,7 @@
 import json
+import os
 import re
+import signal
 import time
 import logging
 from datetime import datetime
@@ -466,6 +468,16 @@ class DatasetDiscoveryAgent:
         search_done = False
         consecutive_no_calls = 0
 
+        # Register a SIGINT handler so Ctrl+C is noticed promptly even during
+        # long blocking I/O (e.g. 45s read_pdf). The handler flags the loop to
+        # stop at the earliest safe point rather than leaving the user waiting.
+        _interrupted = [False]
+        _prev_handler = signal.getsignal(signal.SIGINT)
+        def _on_sigint(signum, frame):
+            _interrupted[0] = True
+            raise KeyboardInterrupt()
+        signal.signal(signal.SIGINT, _on_sigint)
+
         self.logger.info(
             f"Starting search | model={self.model} | query_id={query_id} | "
             f"subject={subject!r} | formats={formats} | time={time_range!r} | "
@@ -474,6 +486,8 @@ class DatasetDiscoveryAgent:
 
         try:
             while iteration < max_iters and not search_done:
+                if _interrupted[0]:
+                    raise KeyboardInterrupt()
                 if deadline is not None and time.time() >= deadline:
                     self.logger.info("Deadline reached — stopping")
                     break
@@ -752,6 +766,8 @@ class DatasetDiscoveryAgent:
             query.dedup_skipped_store = tool_executor.skipped_store_duplicate
             query.existing_at_start = existing_count_at_start
             return query
+        finally:
+            signal.signal(signal.SIGINT, _prev_handler)
 
         status = "completed" if search_done else "interrupted"
         count = len(self.storage.get_datasets(query_id=query_id))
