@@ -508,7 +508,7 @@ class DatasetDiscoveryAgent:
                                 "elapsed": time.time() - start_time,
                             })
                         except Exception:
-                            pass
+                            self.logger.warning("on_activity(model_switched) failed", exc_info=True)
                     # Also push a system note into the conversation so the
                     # incoming model knows it's mid-run and what to focus on.
                     messages.append({
@@ -529,7 +529,7 @@ class DatasetDiscoveryAgent:
                             "elapsed": time.time() - start_time,
                         })
                     except Exception:
-                        pass
+                        self.logger.warning("on_activity(iter_start) failed", exc_info=True)
 
                 try:
                     chat_kwargs = dict(
@@ -578,7 +578,7 @@ class DatasetDiscoveryAgent:
                             "elapsed": time.time() - start_time,
                         })
                     except Exception:
-                        pass
+                        self.logger.warning("on_activity(thinking) failed", exc_info=True)
 
                 if response.message.tool_calls:
                     messages.append(response.message)
@@ -621,7 +621,7 @@ class DatasetDiscoveryAgent:
                                     "elapsed": time.time() - start_time,
                                 })
                             except Exception:
-                                pass
+                                self.logger.warning("on_activity(tool_call) failed", exc_info=True)
 
                         if tool_name == "mark_search_complete":
                             stored_now = len(self.storage.get_datasets(query_id=query_id))
@@ -685,7 +685,7 @@ class DatasetDiscoveryAgent:
                                         "elapsed": time.time() - start_time,
                                     })
                                 except Exception:
-                                    pass
+                                    self.logger.warning("on_activity(tool_result) failed", exc_info=True)
                         messages.append({
                             "role": "tool",
                             "content": json.dumps(result, default=str)[:4000],
@@ -781,5 +781,5 @@ class DatasetDiscoveryAgent:
                     "elapsed": elapsed,
                 })
             except Exception:
-                pass
+                self.logger.warning("on_activity(run_complete) failed", exc_info=True)
         return query

@@ -10,12 +10,15 @@ Examples:
     dataset_search "aerial orthoimagery numpy" --format npy --depth 1
 """
 import sys
+import logging
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.live import Live
 from rich.table import Table
 from rich import box
+
+logger = logging.getLogger("datasets_explorer")
 
 from .agent import DatasetDiscoveryAgent
 from .storage import Storage
@@ -188,7 +191,7 @@ def main(
                     from urllib.parse import urlparse
                     host = (urlparse(d.url).hostname or "").lower().removeprefix("www.")
                 except Exception:
-                    pass
+                    logger.warning("failed to parse host from URL", exc_info=True)
                 is_main = host in ("kaggle.com", "huggingface.co", "github.com") \
                     or any(host.endswith("." + m) for m in ("kaggle.com", "huggingface.co", "github.com"))
                 web_ui.publish({
@@ -206,7 +209,7 @@ def main(
                     },
                 })
             except Exception:
-                pass
+                logger.warning("web_ui.publish(dataset_stored) failed", exc_info=True)
         page = d.url
         what = d.name
         if d.relevance_reasoning:
@@ -225,7 +228,7 @@ def main(
             try:
                 web_ui.publish(ev)
             except Exception:
-                pass
+                logger.warning("web_ui.publish(activity) failed", exc_info=True)
         elapsed = float(ev.get("elapsed", 0.0))
         iteration = int(ev.get("iteration", 0))
         prefix = _prefix(elapsed, iteration)
