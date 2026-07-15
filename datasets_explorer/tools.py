@@ -642,6 +642,7 @@ class ToolExecutor:
 
         # Fall back to Brave if DDG failed or returned nothing — only if a key is set.
         if not ddg_results and BRAVE_API_KEY:
+            self._brave_calls = getattr(self, "_brave_calls", 0) + 1
             try:
                 self.rate_limiter.wait("brave")
                 logger.info(f"[web_search] falling back to Brave for {query!r}")
