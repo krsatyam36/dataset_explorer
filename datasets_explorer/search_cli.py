@@ -22,6 +22,7 @@ from .storage import Storage
 from .models import Dataset
 from .config import (
     OLLAMA_MODEL, OLLAMA_HOST, DB_PATH, DEFAULT_HOURS, DEFAULT_DEPTH,
+    SEMANTIC_RERANK,
 )
 from . import web_ui
 
@@ -96,6 +97,12 @@ DEPTH_DESCRIPTIONS = {
     show_default=True,
     help="Port for the web dashboard.",
 )
+@click.option(
+    "--semantic/--no-semantic",
+    "semantic",
+    default=None,
+    help="Enable semantic reranking of search results via Ollama embeddings.",
+)
 def main(
     subject: str,
     fmt: str,
@@ -107,6 +114,7 @@ def main(
     min_relevance: float,
     web: bool,
     web_port: int,
+    semantic: Optional[bool],
 ):
     """Find datasets matching SUBJECT by autonomously scanning the internet.
 
@@ -126,6 +134,11 @@ def main(
 
     storage = Storage(DB_PATH)
     agent = DatasetDiscoveryAgent(storage, model=model)
+    if semantic is not None:
+        import importlib
+        import datasets_explorer.config as cfg
+        cfg.SEMANTIC_RERANK = semantic
+        console.print(f"[dim]Semantic reranking: [bold]{'ON' if semantic else 'OFF'}[/bold][/dim]")
 
     # Start web dashboard if requested.
     actual_web_port = None
