@@ -45,3 +45,4 @@ def search_pwc_datasets_by_task(task: str) -> List[dict]:
     """Search PapersWithCode datasets filtered by task (e.g. 'Image Classification')."""
     logger.info("search_pwc_datasets_by_task(%r)", task)
     return search_paperswithcode(task, limit=30)
+# feat/int-paperswithcode: Refine int-paperswithcode error handling
