@@ -35,6 +35,7 @@ class DatasetSource(str, Enum):
 
 class Dataset(BaseModel):
     id: Optional[int] = None
+    confidence_score: Optional[float] = None
     name: str
     url: str
     download_url: Optional[str] = None
