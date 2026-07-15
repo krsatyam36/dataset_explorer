@@ -22,6 +22,7 @@ from .storage import Storage
 from .models import Dataset
 from .config import (
     OLLAMA_MODEL, OLLAMA_HOST, DB_PATH, DEFAULT_HOURS, DEFAULT_DEPTH,
+    ALLOWED_SOURCES,
 )
 from . import web_ui
 
@@ -160,6 +161,7 @@ def main(
         f"[bold]Model:[/bold] {agent.model} @ {OLLAMA_HOST}\n"
         f"[bold]Duration:[/bold] {'UNLIMITED' if unlimited else f'{hours}h'}\n"
         f"[bold]Database:[/bold] {DB_PATH}"
+        + (f"\n[bold]Sources:[/bold] {sources}" if sources else "")
     )
     console.print(Panel(banner, title="[bold cyan]dataset_search[/bold cyan]"))
     console.print(
