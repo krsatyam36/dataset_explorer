@@ -33,6 +33,8 @@ CSV_DIR = Path(os.environ.get(
 # Defaults for the search agent
 DEFAULT_HOURS = float(os.environ.get("DEFAULT_HOURS", "2.0"))
 DEFAULT_DEPTH = int(os.environ.get("DEFAULT_DEPTH", "2"))
+# Optional date-range filter appended to every web_search query.
+DEFAULT_DATE_RANGE = os.environ.get("DEFAULT_DATE_RANGE", "")
 
 # Per-depth iteration caps. Depth 3 is effectively unlimited.
 DEPTH_ITERATION_CAPS = {1: 80, 2: 200, 3: 2000}

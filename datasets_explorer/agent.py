@@ -14,6 +14,7 @@ from .utils import RateLimiter, setup_logging
 from .config import (
     OLLAMA_HOST, OLLAMA_MODEL, OLLAMA_FALLBACK_MODELS,
     DEFAULT_HOURS, DEFAULT_DEPTH, DEPTH_ITERATION_CAPS, LOG_DIR, CSV_DIR,
+    DEFAULT_DATE_RANGE,
 )
 
 # Minimum datasets required before mark_search_complete is honored, by depth.
@@ -300,8 +301,9 @@ def build_system_prompt(subject: str, formats: list[str], time_range: str, depth
         parts.append("  Reject datasets that clearly do not provide one of these formats.")
     else:
         parts.append("- Formats: ANY format is acceptable. Do not filter by format.")
-    if time_range:
-        parts.append(f"- Time range: {time_range}")
+    effective_time = time_range or DEFAULT_DATE_RANGE
+    if effective_time:
+        parts.append(f"- Time range: {effective_time}")
         parts.append("  Prefer datasets collected within this time range. Note older or newer ones but score them lower.")
     else:
         parts.append("- Time range: ANY time period is acceptable.")
@@ -445,8 +447,9 @@ class DatasetDiscoveryAgent:
         user_kickoff = f"Find datasets matching: {subject}."
         if formats and "all" not in [f.lower() for f in formats]:
             user_kickoff += f" Required format(s): {', '.join(formats)}."
-        if time_range:
-            user_kickoff += f" Time range: {time_range}."
+        effective_time = time_range or DEFAULT_DATE_RANGE
+        if effective_time:
+            user_kickoff += f" Time range: {effective_time}."
         user_kickoff += " Start by calling web_search now."
 
         messages: list = [
