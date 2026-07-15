@@ -126,6 +126,7 @@ def main(
 
     storage = Storage(DB_PATH)
     agent = DatasetDiscoveryAgent(storage, model=model)
+    web_ui.set_last_query_id(None)  # reset; agent.run will generate a new query_id
 
     # Start web dashboard if requested.
     actual_web_port = None

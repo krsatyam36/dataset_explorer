@@ -63,12 +63,17 @@ _server_thread: Optional[threading.Thread] = None
 _server: Optional[ThreadingHTTPServer] = None
 _server_port: Optional[int] = None
 _storage: Any = None  # set by start() for export endpoint
+_last_query_id: Optional[int] = None  # tracked for "export current query only"
 
 # Model-switch coordination. The web UI writes here; the agent loop polls
 # `consume_model_switch()` at the top of each iteration.
 _pending_model: Optional[str] = None
 _pending_lock = threading.Lock()
 
+
+def set_last_query_id(qid: Optional[int]) -> None:
+    global _last_query_id
+    _last_query_id = qid
 
 def publish(ev: dict) -> None:
     """Public API — agents and CLI call this to emit an event."""
@@ -120,7 +125,13 @@ def _make_handler():
                 from .storage import Storage
                 from .config import DB_PATH
                 s = Storage(DB_PATH)
-                rows = s.get_datasets(limit=10000, min_relevance=0.0)
+                from urllib.parse import urlparse, parse_qs
+                qs = parse_qs(urlparse(self.path).query)
+                current_only = qs.get("current", [None])[0] == "1"
+                if current_only and _last_query_id:
+                    rows = s.get_datasets(query_id=_last_query_id, limit=10000, min_relevance=0.0)
+                else:
+                    rows = s.get_datasets(limit=10000, min_relevance=0.0)
             except Exception:
                 rows = []
             buf = io.StringIO()
@@ -699,7 +710,48 @@ $('model-select').addEventListener('change', (e) => {
 loadModels();
 setInterval(loadModels, 30000);  // refresh in case the user pulls a new model
 
-$('export-btn').addEventListener('click', async () => {
+function showExportOptions(){
+  const existing = document.querySelector('.export-overlay');
+  if(existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'export-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = `<div style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:24px;width:360px">
+    <h3 style="margin:0 0 14px;font-size:14px;color:var(--accent)">Export datasets</h3>
+    <button class="export-opt" data-type="all" style="display:block;width:100%;padding:10px;margin-bottom:8px;background:var(--accent);color:var(--bg);border:none;border-radius:6px;cursor:pointer;font-size:13px">Export All Datasets</button>
+    <button class="export-opt" data-type="current" style="display:block;width:100%;padding:10px;margin-bottom:8px;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px">Export Current Query Only</button>
+    <button onclick="this.parentElement.parentElement.remove()" style="display:block;width:100%;padding:8px;background:transparent;color:var(--muted);border:none;cursor:pointer;font-size:12px">Cancel</button>
+  </div>`;
+  overlay.querySelectorAll('.export-opt').forEach(b => {
+    b.addEventListener('click', () => {
+      overlay.remove();
+      doExport(b.dataset.type);
+    });
+  });
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+async function doExport(type){
+  const btn = $('export-btn');
+  const orig = btn.textContent;
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  try {
+    const r = await fetch('/export/csv' + (type==='current' ? '?current=1' : ''));
+    const blob = await r.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'datasets_export.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    pushRow('store', '⬇', `Exported ${(blob.size/1024).toFixed(0)}KB CSV`, {elapsed:0});
+  } catch(e){ console.warn('export error', e); }
+  finally { btn.textContent = '✅'; setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000); }
+}
+$('export-btn').addEventListener('click', showExportOptions);
   const btn = $('export-btn');
   const orig = btn.textContent;
   btn.textContent = '⏳';
