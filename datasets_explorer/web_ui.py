@@ -480,7 +480,7 @@ document.addEventListener('keydown', e => {
 function toggleAutoScroll(){
   state.autoScroll = !state.autoScroll;
   if(state.autoScroll){
-    stream.scrollTop = stream.scrollHeight;
+    stream.scrollTo({top: stream.scrollHeight, behavior: 'smooth'});
     if(autoScrollBtn) autoScrollBtn.style.display = 'none';
     const s = $('scroll-status');
     if(s) s.style.display = 'none';
