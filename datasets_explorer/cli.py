@@ -157,6 +157,29 @@ def queries():
 
 
 @cli.command()
+@click.option("--interval", default=5, help="Poll interval in seconds", show_default=True)
+@click.option("--query-id", type=int, default=None, help="Watch a specific query only")
+def watch(interval, query_id):
+    """Watch for new datasets arriving in real-time."""
+    import time as _time
+    from datetime import datetime
+    storage = Storage(DB_PATH)
+    seen = {d.id for d in storage.get_datasets(query_id=query_id, limit=10_000)}
+    console.print(f"[green]Watching for new datasets (every {interval}s)...[/green]")
+    try:
+        while True:
+            _time.sleep(interval)
+            fresh = [d for d in storage.get_datasets(query_id=query_id, limit=10_000) if d.id not in seen]
+            for d in fresh:
+                ts = d.discovered_at.strftime("%H:%M:%S") if d.discovered_at else ""
+                console.print(f"  [{ts}] [#{d.id}] {d.name}  [dim]({d.source.value})[/dim]")
+                seen.add(d.id)
+            if fresh:
+                console.print(f"  [dim]— {len(fresh)} new —[/dim]")
+    except KeyboardInterrupt:
+        console.print("\nStopped.")
+
+@cli.command()
 @click.argument("dataset_id", type=int)
 @click.argument("notes")
 def annotate(dataset_id: int, notes: str):
