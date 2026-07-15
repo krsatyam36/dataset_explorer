@@ -254,3 +254,4 @@ def _render_dataset_detail(d: Dataset) -> None:
     )
     console.print(Panel(details, title=f"Dataset #{d.id}"))
 # feat/cli-watch: Refine cli-watch CLI output
+# feat/cli-watch: Add cli-watch error messages
