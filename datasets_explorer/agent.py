@@ -395,6 +395,16 @@ class DatasetDiscoveryAgent:
         setup_logging(LOG_DIR)
         self.logger = logging.getLogger("datasets_explorer")
         self._client = ollama.Client(host=host or OLLAMA_HOST)
+        # Health check before anything else — gives a clear error if Ollama isn't running.
+        try:
+            self._client.list()
+        except Exception as e:
+            raise RuntimeError(
+                f"Ollama server is not reachable at {host or OLLAMA_HOST}.\n"
+                f"Make sure Ollama is running: 'ollama serve' or 'systemctl start ollama'.\n"
+                f"Check OLLAMA_HOST in .env if you use a non-default address.\n"
+                f"Error: {e}"
+            ) from e
         self.model = _select_available_model(self._client, model or OLLAMA_MODEL)
 
     def run(
