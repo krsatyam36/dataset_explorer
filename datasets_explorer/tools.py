@@ -1399,3 +1399,4 @@ class ToolExecutor:
         )
         return {"done": True, "summary": inp.get("summary", ""), "total": inp.get("total_found", 0)}
 # feat/search-keyword-expansion: Add search-keyword-expansion helper function
+# feat/search-keyword-expansion: Wire search-keyword-expansion into search pipeline
