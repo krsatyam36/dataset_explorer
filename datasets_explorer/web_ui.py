@@ -277,8 +277,13 @@ header .status .live::before{content:'';display:inline-block;width:8px;height:8p
 
 main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;min-height:300px}
-.panel h2{margin:0;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.panel h2{margin:0;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.panel h2:active{opacity:.7}
+.panel.collapsed .body{display:none}
+.panel.collapsed h2{border-bottom:none}
 .panel h2 .count{margin-left:auto;font-family:var(--mono);color:var(--text);background:var(--panel-2);padding:2px 8px;border-radius:6px;font-size:11px}
+.panel h2::after{content:'−';margin-left:auto;color:var(--muted);font-size:14px;padding-left:8px}
+.panel.collapsed h2::after{content:'+'}
 .panel .body{flex:1;overflow:auto}
 
 .now{padding:14px}
@@ -527,6 +532,11 @@ function pushThinking(meta, text){
   $('thinking-count').textContent = state.thinkingCount;
   while(thinkingPane.childElementCount > 200) thinkingPane.removeChild(thinkingPane.lastChild);
 }
+
+document.addEventListener('click', e => {
+  const h2 = e.target.closest('.panel h2');
+  if(h2){ h2.closest('.panel').classList.toggle('collapsed'); }
+});
 
 function applyEvent(ev){
   if(ev.type === 'run_start'){
