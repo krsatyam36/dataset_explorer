@@ -773,12 +773,16 @@ class DatasetDiscoveryAgent:
         query.existing_at_start = existing_count_at_start
         if on_activity is not None:
             try:
+                sources_seen = {d.source for d in self.storage.get_datasets(query_id=query_id, limit=500)}
                 on_activity({
                     "type": "run_complete",
                     "status": status,
                     "stored": count,
                     "iteration": iteration,
                     "elapsed": elapsed,
+                    "sources": list(sources_seen),
+                    "mainstream": getattr(tool_executor, "mainstream_stored", 0),
+                    "alternative": getattr(tool_executor, "alternative_stored", 0),
                 })
             except Exception:
                 pass
