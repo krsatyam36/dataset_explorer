@@ -64,3 +64,4 @@ def get_github_dataset_readme(repo_full_name: str) -> Optional[str]:
     return None
 # feat/int-github-search: Refine int-github-search error handling
 # feat/int-github-search: Add int-github-search timeout config
+# feat/int-github-search: Add int-github-search rate limiting
