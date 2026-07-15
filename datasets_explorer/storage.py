@@ -20,7 +20,7 @@ class Storage:
         backup_path = backup_dir / f"results_{stamp}{suffix}.db"
         try:
             self._conn.commit()
-            self._conn.execute("VACUUM")
+            self._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
             shutil.copy2(self.db_path, backup_path)
             logger.info(f"DB backed up to {backup_path}")
             return backup_path
