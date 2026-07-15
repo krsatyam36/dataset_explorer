@@ -39,6 +39,31 @@ class RateLimiter:
         self._last_request[domain] = time.time()
 
 
+def parse_ollama_model_list(response: object) -> set[str]:
+    """Extract model names from an Ollama client.list() response.
+
+    Handles both the newer ListResponse object (with .models attribute,
+    each having .model or .name) and the older dict response shape.
+    Returns an empty set on any parse failure.
+    """
+    names: set[str] = set()
+    try:
+        models = (
+            response.get("models") if isinstance(response, dict)
+            else getattr(response, "models", []) or []
+        )
+        for m in models:
+            if isinstance(m, dict):
+                n = m.get("model") or m.get("name") or ""
+            else:
+                n = getattr(m, "model", None) or getattr(m, "name", None) or ""
+            if n:
+                names.add(str(n))
+    except Exception:
+        pass
+    return names
+
+
 def setup_logging(log_dir: Path) -> logging.Logger:
     log_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

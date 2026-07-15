@@ -10,7 +10,7 @@ import ollama
 from .tools import TOOL_DEFINITIONS, ToolExecutor
 from .storage import Storage
 from .models import SearchQuery
-from .utils import RateLimiter, setup_logging
+from .utils import RateLimiter, setup_logging, parse_ollama_model_list
 from .config import (
     OLLAMA_HOST, OLLAMA_MODEL, OLLAMA_FALLBACK_MODELS,
     DEFAULT_HOURS, DEFAULT_DEPTH, DEPTH_ITERATION_CAPS, LOG_DIR, CSV_DIR,
@@ -373,7 +373,7 @@ def _extract_tool_calls(message) -> list[dict]:
 def _select_available_model(client: ollama.Client, preferred: str) -> str:
     """Return preferred model if pulled, else first fallback that's available."""
     try:
-        installed = {m.model for m in client.list().models}
+        installed = parse_ollama_model_list(client.list())
     except Exception:
         return preferred
     candidates = [preferred] + [m for m in OLLAMA_FALLBACK_MODELS if m != preferred]

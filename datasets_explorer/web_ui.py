@@ -114,13 +114,10 @@ def _make_handler():
             try:
                 import ollama
                 from .config import OLLAMA_HOST
+                from .utils import parse_ollama_model_list
                 client = ollama.Client(host=OLLAMA_HOST)
                 resp = client.list()
-                names = []
-                for m in (resp.get("models") if isinstance(resp, dict) else getattr(resp, "models", [])) or []:
-                    n = m.get("name") if isinstance(m, dict) else getattr(m, "model", None) or getattr(m, "name", None)
-                    if n:
-                        names.append(n)
+                names = sorted(parse_ollama_model_list(resp))
             except Exception as e:
                 names = []
                 logger.warning(f"/models error: {e}")
