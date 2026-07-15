@@ -253,6 +253,7 @@ INDEX_HTML = r"""<!doctype html>
   --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --sans:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
+.light{--bg:#f5f7fa;--panel:#ffffff;--panel-2:#eef1f5;--border:#d0d7de;--text:#1f2328;--muted:#656d76;--accent:#0969da;--accent-2:#8250df;--good:#1a7f37;--warn:#9a6700;--bad:#cf222e;--info:#0550ae}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}
 header{padding:14px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--panel)}
@@ -261,6 +262,8 @@ header .subject{font-family:var(--mono);color:var(--text);background:var(--panel
 header .status{margin-left:auto;display:flex;align-items:center;gap:14px}
 header .status .pill{padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--panel-2);font-family:var(--mono);font-size:12px;color:var(--muted)}
 header .status .live{color:var(--good)}
+.theme-btn{cursor:pointer;font-size:16px;padding:2px;border-radius:4px;transition:transform .2s;user-select:none}
+.theme-btn:hover{transform:scale(1.15)}
 #model-select{background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:12px;padding:1px 4px;outline:none}
 #model-select:hover{border-color:var(--accent)}
 #model-pill{display:inline-flex;align-items:center;gap:6px}
@@ -347,6 +350,7 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
     </span>
     <span class="pill" id="depth">depth: —</span>
     <span class="pill live" id="live">live</span>
+    <span class="theme-btn" id="theme-btn" title="Toggle theme">🌙</span>
     <span class="pill" id="elapsed">T+00m00s</span>
   </div>
 </header>
@@ -656,6 +660,21 @@ $('model-select').addEventListener('change', (e) => {
 });
 loadModels();
 setInterval(loadModels, 30000);  // refresh in case the user pulls a new model
+
+function toggleTheme(){
+  document.documentElement.classList.toggle('light');
+  const isLight = document.documentElement.classList.contains('light');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  $('theme-btn').textContent = isLight ? '☀️' : '🌙';
+}
+(function initTheme(){
+  const saved = localStorage.getItem('theme');
+  if(saved==='light' || (!saved && window.matchMedia('(prefers-color-scheme:light)').matches)){
+    document.documentElement.classList.add('light');
+    $('theme-btn').textContent = '☀️';
+  }
+})();
+$('theme-btn').addEventListener('click', toggleTheme);
 
 function connect(){
   const es = new EventSource('/events');
