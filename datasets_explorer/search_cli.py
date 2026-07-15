@@ -164,6 +164,7 @@ def main(
         f"[bold]Model:[/bold] {agent.model} @ {OLLAMA_HOST}\n"
         f"[bold]Duration:[/bold] {'UNLIMITED' if unlimited else f'{hours}h'}\n"
         f"[bold]Database:[/bold] {DB_PATH}"
+        + (f"\n[bold]Rerank:[/bold] {'ON' if SEMANTIC_RERANK else 'OFF'}" if SEMANTIC_RERANK else "")
     )
     console.print(Panel(banner, title="[bold cyan]dataset_search[/bold cyan]"))
     console.print(
