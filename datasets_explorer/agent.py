@@ -711,6 +711,20 @@ class DatasetDiscoveryAgent:
 
                 # Every N iterations, inject a progress reminder so the model
                 # doesn't drift, get stuck on one source, or wind down too early.
+                # Self-reflection every 25 iterations: ask the model to assess coverage gaps.
+                if iteration > 0 and iteration % 25 == 0 and not search_done:
+                    stored_now = len(self.storage.get_datasets(query_id=query_id))
+                    sources_seen = {d.source for d in self.storage.get_datasets(query_id=query_id, limit=500)}
+                    messages.append({
+                        "role": "user",
+                        "content": (
+                            f"[self-reflection @ iter {iteration}] So far: {stored_now} datasets "
+                            f"from {sorted(sources_seen)}. What sources have you NOT yet explored? "
+                            f"Identify 2-3 specific queries you should run next that would cover "
+                            f"different ground from what you have done so far."
+                        ),
+                    })
+
                 if iteration > 0 and iteration % PROGRESS_REMINDER_EVERY == 0 and not search_done:
                     stored_now = len(self.storage.get_datasets(query_id=query_id))
                     min_needed = DEPTH_MIN_DATASETS.get(depth, 25)
