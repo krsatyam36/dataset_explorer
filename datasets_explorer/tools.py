@@ -376,6 +376,15 @@ class ToolExecutor:
             self._csv_fh = None
             self._csv_writer = None
 
+    def close(self) -> None:
+        if self._http is not None:
+            self._http.close()
+        if self._csv_fh is not None:
+            try:
+                self._csv_fh.close()
+            except Exception:
+                pass
+
     def execute(self, tool_name: str, tool_input: dict) -> Any:
         dispatch = {
             "web_search": self._web_search,

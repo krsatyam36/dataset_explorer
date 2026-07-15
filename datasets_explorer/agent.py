@@ -751,6 +751,7 @@ class DatasetDiscoveryAgent:
             query.dedup_skipped_fetch = tool_executor.skipped_fetch_already_seen
             query.dedup_skipped_store = tool_executor.skipped_store_duplicate
             query.existing_at_start = existing_count_at_start
+            tool_executor.close()
             return query
 
         status = "completed" if search_done else "interrupted"
@@ -782,4 +783,5 @@ class DatasetDiscoveryAgent:
                 })
             except Exception:
                 pass
+        tool_executor.close()
         return query
