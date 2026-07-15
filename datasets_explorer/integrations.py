@@ -62,3 +62,4 @@ def get_kaggle_trending(limit: int = 10) -> List[dict]:
     """Fetch trending Kaggle datasets."""
     logger.info("get_kaggle_trending(limit=%d)", limit)
     return search_kaggle("", limit=limit)
+# feat/int-kaggle: Refine int-kaggle error handling
