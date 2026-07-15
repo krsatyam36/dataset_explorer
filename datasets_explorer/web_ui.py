@@ -667,7 +667,13 @@ loadModels();
 setInterval(loadModels, 30000);  // refresh in case the user pulls a new model
 
 const sf = $('stream-filter');
-if(sf) sf.addEventListener('input', applyStreamFilter);
+if(sf){
+  sf.addEventListener('input', applyStreamFilter);
+  sf.addEventListener('keydown', e => { if(e.key==='Escape'){ sf.value=''; applyStreamFilter(); sf.blur(); } });
+}
+document.addEventListener('keydown', e => {
+  if((e.ctrlKey||e.metaKey) && e.key==='l' && sf){ e.preventDefault(); sf.focus(); sf.select(); }
+});
 
 function connect(){
   const es = new EventSource('/events');
