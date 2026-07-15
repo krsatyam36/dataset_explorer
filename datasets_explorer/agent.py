@@ -793,3 +793,4 @@ class DatasetDiscoveryAgent:
         return query
 # feat/agent-adaptive-depth: Refine agent-adaptive-depth implementation
 # feat/agent-adaptive-depth: Add agent-adaptive-depth config option
+# feat/agent-adaptive-depth: Test agent-adaptive-depth edge cases
