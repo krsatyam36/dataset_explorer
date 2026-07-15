@@ -553,7 +553,7 @@ function showDatasetDetail(d){
     ['Formats', (d.formats||[]).join(', ')||'—'],
     ['Size', d.size_human||'—'],
     ['Num Samples', d.num_samples!=null ? d.num_samples.toLocaleString() : '—'],
-    ['Description', escapeHtml((d.description||'').slice(0,300))],
+    ['Description', escapeHtml((d.description||'').slice(0,300)) + ((d.description||'').length>300 ? ' <span style="color:var(--muted);font-size:10px">…truncated</span>' : '')],
   ];
   card.innerHTML = `<h3>${escapeHtml(d.name||'')}</h3>
     <div class="dd-url"><a href="${escapeHtml(d.url||'')}" target="_blank">${escapeHtml(d.url||'')}</a></div>
@@ -562,6 +562,9 @@ function showDatasetDetail(d){
       ${trustFields}
     </div>
     ${fields.filter(f=>f[0]!=='Name'&&f[0]!=='URL'&&f[0]!=='Relevance Score'&&f[0]!=='Reasoning').map(f=>`<div class="dd-field"><span class="key">${f[0]}</span><span class="val">${f[1]}</span></div>`).join('')}
+    <div style="margin:8px 0 0;padding:8px;background:var(--bg);border-radius:6px;font-size:11px;color:var(--muted)">
+      <b>Relevance reasoning:</b><br>${escapeHtml(d.relevance_reasoning||'—')}
+    </div>`
     <button class="dd-close" onclick="document.getElementById('dd-overlay').classList.remove('open')">Close</button>`;
   $('dd-overlay').classList.add('open');
 }
