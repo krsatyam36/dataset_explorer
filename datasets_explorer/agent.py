@@ -471,6 +471,17 @@ class DatasetDiscoveryAgent:
             f"subject={subject!r} | formats={formats} | time={time_range!r} | "
             f"depth={depth} | max_iters={max_iters} | hours={max_hours}"
         )
+        if on_activity is not None:
+            try:
+                on_activity({
+                    "type": "model_status",
+                    "status": "active",
+                    "info": f"v0.1 {self.model}",
+                    "iteration": 0,
+                    "elapsed": 0,
+                })
+            except Exception:
+                pass
 
         try:
             while iteration < max_iters and not search_done:
@@ -504,6 +515,13 @@ class DatasetDiscoveryAgent:
                                 "type": "model_switched",
                                 "from": old_model,
                                 "to": self.model,
+                                "iteration": iteration,
+                                "elapsed": time.time() - start_time,
+                            })
+                            on_activity({
+                                "type": "model_status",
+                                "status": "active",
+                                "info": f"v0.1 {self.model}",
                                 "iteration": iteration,
                                 "elapsed": time.time() - start_time,
                             })

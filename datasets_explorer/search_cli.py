@@ -136,6 +136,7 @@ def main(
                 "type": "run_start",
                 "subject": subject,
                 "model": agent.model,
+                "model_info": f"v0.1 {agent.model}",
                 "depth": depth,
                 "max_iters": {1: 80, 2: 200, 3: 2000}.get(depth, 200),
                 "min_needed": {1: 10, 2: 25, 3: 50}.get(depth, 25),
