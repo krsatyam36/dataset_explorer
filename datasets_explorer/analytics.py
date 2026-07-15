@@ -50,3 +50,4 @@ def source_diversity_report(storage_datasets) -> Dict:
         "dominant_fraction": round(max(dist.values()) / sum(dist.values()), 4) if dist else 0,
     }
 # feat/analytics-source-diversity: Refine analytics-source-diversity output format
+# feat/analytics-source-diversity: Add analytics-source-diversity edge case handling
