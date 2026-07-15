@@ -123,6 +123,13 @@ For every store_dataset call you must populate:
   - url (the page where you found it)
   - download_url (real one if you saw it, else same as url)
   - relevance_score and relevance_reasoning
+
+## Multi-perspective evaluation
+Before storing, evaluate each dataset from THREE distinct angles:
+  1. **Coverage** — does this add a new source/format/topic not yet seen?
+  2. **Quality** — is it annotated, curated, published in a reputable venue?
+  3. **Novelty** — is this dataset rare / hard to find / from an unconventional source?
+Mention which angle drove the storage decision in relevance_reasoning.
 """
 
 
