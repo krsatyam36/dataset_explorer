@@ -43,3 +43,4 @@ def get_format_size_correlation(storage_datasets) -> Dict[str, int]:
                 fmt_sizes.setdefault(fmt.lower(), []).append(ds.size_bytes)
     return {fmt: int(sum(sizes) / len(sizes)) for fmt, sizes in fmt_sizes.items()}
 # feat/analytics-format-stats: Refine analytics-format-stats output format
+# feat/analytics-format-stats: Add analytics-format-stats edge case handling
