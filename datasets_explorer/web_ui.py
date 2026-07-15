@@ -272,7 +272,8 @@ header .status .live::before{content:'';display:inline-block;width:8px;height:8p
 .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:14px 22px;background:var(--bg)}
 .kpi{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 12px;position:relative;cursor:help}
 .kpi:hover .kpi-tip{opacity:1;visibility:visible;transform:translateY(0)}
-.kpi .lbl{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+.kpi .lbl{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:4px}
+.kpi .lbl .q{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--border);color:var(--muted);font-size:9px;font-weight:700;font-family:var(--sans)}
 .kpi .val{font-family:var(--mono);font-size:20px;margin-top:2px}
 .kpi .sub{color:var(--muted);font-size:11px;margin-top:1px}
 .kpi-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px);background:var(--panel-2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:11px;color:var(--muted);white-space:nowrap;z-index:10;opacity:0;visibility:hidden;transition:all .2s;max-width:280px;white-space:normal;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.3)}
@@ -357,12 +358,12 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
 </header>
 
 <section class="kpis">
-  <div class="kpi"><div class="lbl">Iteration</div><div class="val" id="kpi-iter">0</div><div class="sub" id="kpi-iter-cap">/—</div><div class="kpi-tip">How many tool-call loops the agent has executed so far</div></div>
-  <div class="kpi"><div class="lbl">Stored</div><div class="val" id="kpi-stored">0</div><div class="sub" id="kpi-needed">need —</div><div class="kpi-tip">Datasets saved to the local database this run. The "need" target is based on search depth.</div></div>
-  <div class="kpi"><div class="lbl">Mainstream : Alternative</div><div class="val" id="kpi-ratio">0 : 0</div><div class="sub">target 1 : 2+</div><div class="kpi-tip">Balancing rule: for every Kaggle/HF/GitHub dataset, at least 2 from other sources must be stored. Alternative count must be ≥ 2× mainstream.</div></div>
-  <div class="kpi"><div class="lbl">Searches</div><div class="val" id="kpi-search">0</div><div class="sub" id="kpi-search-rejected">0 rejected</div><div class="kpi-tip">Total web_search and arxiv_search calls made. Rejected ones may contain broad queries without operators or repeat queries.</div></div>
-  <div class="kpi"><div class="lbl">PDFs read</div><div class="val" id="kpi-pdf">0</div><div class="sub" id="kpi-readme">0 READMEs</div><div class="kpi-tip">Papers and READMEs mined. PDFs are the richest source — each paper may cite 5-20 datasets by name.</div></div>
-  <div class="kpi"><div class="lbl">Sites visited</div><div class="val" id="kpi-sites">0</div><div class="sub" id="kpi-fetches">0 fetches</div><div class="kpi-tip">Unique domains the agent has fetched or read. Higher diversity = better source coverage.</div></div>
+  <div class="kpi"><div class="lbl"><span class="q">?</span>Iteration</div><div class="val" id="kpi-iter">0</div><div class="sub" id="kpi-iter-cap">/—</div><div class="kpi-tip">How many tool-call loops the agent has executed so far</div></div>
+  <div class="kpi"><div class="lbl"><span class="q">?</span>Stored</div><div class="val" id="kpi-stored">0</div><div class="sub" id="kpi-needed">need —</div><div class="kpi-tip">Datasets saved to the local database this run. The "need" target is based on search depth.</div></div>
+  <div class="kpi"><div class="lbl"><span class="q">?</span>Mainstream : Alternative</div><div class="val" id="kpi-ratio">0 : 0</div><div class="sub">target 1 : 2+</div><div class="kpi-tip">Balancing rule: for every Kaggle/HF/GitHub dataset, at least 2 from other sources must be stored. Alternative count must be ≥ 2× mainstream.</div></div>
+  <div class="kpi"><div class="lbl"><span class="q">?</span>Searches</div><div class="val" id="kpi-search">0</div><div class="sub" id="kpi-search-rejected">0 rejected</div><div class="kpi-tip">Total web_search and arxiv_search calls made. Rejected ones may contain broad queries without operators or repeat queries.</div></div>
+  <div class="kpi"><div class="lbl"><span class="q">?</span>PDFs read</div><div class="val" id="kpi-pdf">0</div><div class="sub" id="kpi-readme">0 READMEs</div><div class="kpi-tip">Papers and READMEs mined. PDFs are the richest source — each paper may cite 5-20 datasets by name.</div></div>
+  <div class="kpi"><div class="lbl"><span class="q">?</span>Sites visited</div><div class="val" id="kpi-sites">0</div><div class="sub" id="kpi-fetches">0 fetches</div><div class="kpi-tip">Unique domains the agent has fetched or read. Higher diversity = better source coverage.</div></div>
 </section>
 
 <main>
