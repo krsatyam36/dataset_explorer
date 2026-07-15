@@ -269,6 +269,8 @@ header .status .live{color:var(--good)}
 #model-select:hover{border-color:var(--accent)}
 #model-pill{display:inline-flex;align-items:center;gap:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes progress-pulse{0%{opacity:1}50%{opacity:.7}100%{opacity:1}}
+.progress-bar.active{animation:progress-pulse 2s ease-in-out infinite}
 #model-switching{display:inline-block;animation:spin 1s linear infinite}
 header .status .live::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--good);margin-right:6px;box-shadow:0 0 0 0 rgba(158,206,106,.7);animation:pulse 1.5s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(158,206,106,.7)}70%{box-shadow:0 0 0 8px rgba(158,206,106,0)}100%{box-shadow:0 0 0 0 rgba(158,206,106,0)}}
@@ -517,8 +519,9 @@ function updateProgress(iter, maxIter, status){
   const pct = maxIter && maxIter>0 ? Math.min(100, (iter/maxIter)*100) : 0;
   bar.style.width = pct + '%';
   bar.className = 'progress-bar';
-  if(status==='done') bar.classList.add('done');
-  else if(status==='paused') bar.classList.add('paused');
+  if(status==='done'){ bar.classList.add('done'); }
+  else if(status==='paused'){ bar.classList.add('paused'); }
+  else { bar.classList.add('active'); }
 }
 
 function applyEvent(ev){
