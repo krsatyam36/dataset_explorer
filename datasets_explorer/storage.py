@@ -16,6 +16,28 @@ class Storage:
         self._conn.row_factory = sqlite3.Row
         self._init_schema()
 
+    def merge_from(self, other_db: Path) -> int:
+        other = Storage(other_db)
+        other_rows = other._conn.execute("SELECT * FROM datasets").fetchall()
+        count = 0
+        for r in other_rows:
+            d = dict(r)
+            d.pop("id", None)
+            cols = ", ".join(d.keys())
+            placeholders = ", ".join("?" for _ in d)
+            try:
+                self._conn.execute(
+                    f"INSERT OR IGNORE INTO datasets ({cols}) VALUES ({placeholders})",
+                    list(d.values()),
+                )
+                count += 1
+            except Exception:
+                pass
+        self._conn.commit()
+        other._conn.close()
+        logger.info(f"Merged {count} datasets from {other_db}")
+        return count
+
     def _init_schema(self) -> None:
         self._conn.executescript("""
             CREATE TABLE IF NOT EXISTS search_queries (
