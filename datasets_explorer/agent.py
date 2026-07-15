@@ -415,6 +415,12 @@ class DatasetDiscoveryAgent:
         query_id = self.storage.save_query(query)
         query.id = query_id
 
+        # Auto-backup the DB before starting.
+        try:
+            self.storage.backup(suffix="_pre_run")
+        except Exception:
+            pass
+
         # Load every URL we've ever stored so the agent skips rediscovering them.
         existing_urls = self.storage.get_all_urls()
         existing_count_at_start = len(existing_urls)

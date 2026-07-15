@@ -1,14 +1,33 @@
+import logging
+import shutil
 import sqlite3
 import json
 from pathlib import Path
 from typing import List, Optional
 from datetime import datetime
 
+logger = logging.getLogger("datasets_explorer.storage")
+
 from .models import Dataset, SearchQuery, DatasetSource
 from .config import DB_PATH
 
 
 class Storage:
+    def backup(self, suffix: str = "") -> Optional[Path]:
+        backup_dir = self.db_path.parent / "backups"
+        backup_dir.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_path = backup_dir / f"results_{stamp}{suffix}.db"
+        try:
+            self._conn.commit()
+            self._conn.execute("VACUUM")
+            shutil.copy2(self.db_path, backup_path)
+            logger.info(f"DB backed up to {backup_path}")
+            return backup_path
+        except Exception as e:
+            logger.warning(f"Backup failed: {e}")
+            return None
+
     def __init__(self, db_path: Path = DB_PATH):
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
