@@ -531,6 +531,7 @@ function toggleSound(){
   localStorage.setItem('soundMuted', _muted ? '1' : '0');
   const btn = $('sound-btn');
   if(btn) btn.textContent = _muted ? '🔇' : '🔔';
+  if(!_muted){ beep(660,0.08); setTimeout(()=>beep(880,0.1),100); }
 }
 
 function applyEvent(ev){
