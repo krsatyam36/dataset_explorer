@@ -783,3 +783,4 @@ class DatasetDiscoveryAgent:
             except Exception:
                 pass
         return query
+# feat/agent-confidence-score: Refine agent-confidence-score implementation
