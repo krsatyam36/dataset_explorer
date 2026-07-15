@@ -736,6 +736,7 @@ $('new-search-btn').addEventListener('click', openSearchForm);
 document.addEventListener('keydown', e => {
   if(e.key==='Escape' && $('search-overlay').classList.contains('open')) closeSearchForm();
   if(e.key==='Enter' && $('search-overlay').classList.contains('open') && document.activeElement===$('search-subject')) submitSearchForm();
+  if((e.ctrlKey||e.metaKey) && e.key==='k'){ e.preventDefault(); openSearchForm(); }
 });
 
 function connect(){
