@@ -437,7 +437,7 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
   </div>
 </section>
 
-<footer>events stream over Server-Sent Events · keep this tab open during the run</footer>
+<footer>events stream over Server-Sent Events · keep this tab open during the run · <kbd style="background:var(--panel-2);padding:1px 5px;border-radius:3px;border:1px solid var(--border);font-size:10px">Ctrl+K</kbd> new search</footer>
 
 <div class="search-overlay" id="search-overlay">
   <div class="search-card">
@@ -569,6 +569,10 @@ function pushThinking(meta, text){
 }
 
 function applyEvent(ev){
+  if(ev.type === 'new_search_started'){
+    pushRow('search', '🚀', `New search: <b>${escapeHtml(ev.subject||'')}</b> depth ${ev.depth||2}`, ev);
+    return;
+  }
   if(ev.type === 'run_start'){
     state.startedAt = (Date.now()/1000) - (ev.elapsed||0);
     if(ev.subject) $('subject').textContent = ev.subject;
