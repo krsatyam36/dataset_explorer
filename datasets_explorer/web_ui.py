@@ -725,9 +725,20 @@ setInterval(loadModels, 30000);  // refresh in case the user pulls a new model
 
 function openSearchForm(){ $('search-overlay').classList.add('open'); setTimeout(()=>$('search-subject').focus(),100); }
 function closeSearchForm(){ $('search-overlay').classList.remove('open'); }
+function showFormError(msg){
+  const existing = document.querySelector('.search-card .error');
+  if(existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'error';
+  el.style.cssText = 'color:var(--bad);font-size:12px;margin-bottom:10px';
+  el.textContent = msg;
+  document.querySelector('.search-card .actions').before(el);
+}
+function clearFormError(){ const e = document.querySelector('.search-card .error'); if(e) e.remove(); }
 function submitSearchForm(){
+  clearFormError();
   const sub = $('search-subject').value.trim();
-  if(!sub) return;
+  if(!sub){ showFormError('Subject is required'); $('search-subject').focus(); return; }
   const depth = $('search-depth').value;
   const fmt = $('search-format').value.trim();
   let cmd = `dataset_search "${sub}" --depth ${depth}`;
@@ -737,6 +748,7 @@ function submitSearchForm(){
   setTimeout(() => { window.open('', '_self'); window.location.href = 'about:blank'; }, 500);
 }
 $('new-search-btn').addEventListener('click', openSearchForm);
+$('search-subject').addEventListener('input', clearFormError);
 document.addEventListener('keydown', e => {
   if(e.key==='Escape' && $('search-overlay').classList.contains('open')) closeSearchForm();
   if(e.key==='Enter' && $('search-overlay').classList.contains('open') && document.activeElement===$('search-subject')) submitSearchForm();
