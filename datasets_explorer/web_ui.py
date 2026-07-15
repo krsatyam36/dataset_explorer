@@ -244,6 +244,8 @@ INDEX_HTML = r"""<!doctype html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%237aa2f7'/><text x='16' y='22' font-size='18' fill='%230b0e14' text-anchor='middle' font-family='sans-serif' font-weight='bold'>DS</text></svg>" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230b0e14'/><text x='16' y='22' font-size='18' fill='%237aa2f7' text-anchor='middle' font-family='sans-serif' font-weight='bold'>DS</text></svg>" media="(prefers-color-scheme:dark)" />
 <title>dataset_search · live</title>
 <style>
 :root{
@@ -506,10 +508,16 @@ function pushThinking(meta, text){
   while(thinkingPane.childElementCount > 200) thinkingPane.removeChild(thinkingPane.lastChild);
 }
 
+function setTitle(ev){
+  const base = 'dataset_search';
+  if(ev && ev.subject) document.title = `${ev.subject} · ${base}`;
+  else document.title = base;
+}
+
 function applyEvent(ev){
   if(ev.type === 'run_start'){
     state.startedAt = (Date.now()/1000) - (ev.elapsed||0);
-    if(ev.subject) $('subject').textContent = ev.subject;
+    if(ev.subject){ $('subject').textContent = ev.subject; setTitle(ev); }
     if(ev.model) {
       state.activeModel = ev.model;
       const sel = $('model-select');
@@ -602,6 +610,7 @@ function applyEvent(ev){
   if(ev.type === 'dataset_stored'){
     state.stored += 1;
     $('kpi-stored').textContent = state.stored;
+    document.title = `[${state.stored}] datasets ${document.title.replace(/^\[\d+\]\s/,'')}`;
     if(ev.is_mainstream) state.mainstream += 1; else state.alternative += 1;
     $('kpi-ratio').textContent = `${state.mainstream} : ${state.alternative}`;
     pushFinding(ev.dataset || {});
@@ -611,6 +620,7 @@ function applyEvent(ev){
   if(ev.type === 'run_complete'){
     $('live').textContent = 'done';
     $('live').classList.remove('live');
+    document.title = `✅ ${document.title}`;
     pushRow('store', '✅', `Run complete · ${ev.status||''} · ${ev.stored||0} stored`, ev);
     return;
   }
