@@ -246,3 +246,4 @@ def _render_dataset_detail(d: Dataset) -> None:
         f"[bold]Description:[/bold]\n{d.description or '(none)'}"
     )
     console.print(Panel(details, title=f"Dataset #{d.id}"))
+# feat/cli-batch: Refine cli-batch CLI output
