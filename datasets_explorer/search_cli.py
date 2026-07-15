@@ -96,6 +96,11 @@ DEPTH_DESCRIPTIONS = {
     show_default=True,
     help="Port for the web dashboard.",
 )
+@click.option(
+    "--date-range",
+    default="",
+    help='Date range filter, e.g. "2020-2024", "last 5 years", or env DEFAULT_DATE_RANGE.',
+)
 def main(
     subject: str,
     fmt: str,
@@ -107,6 +112,7 @@ def main(
     min_relevance: float,
     web: bool,
     web_port: int,
+    date_range: str,
 ):
     """Find datasets matching SUBJECT by autonomously scanning the internet.
 
@@ -123,6 +129,7 @@ def main(
         formats = [f.strip().lower() for f in fmt.split(",") if f.strip()]
 
     max_hours = None if unlimited else hours
+    effective_time = date_range or time_range
 
     storage = Storage(DB_PATH)
     agent = DatasetDiscoveryAgent(storage, model=model)
@@ -273,7 +280,7 @@ def main(
         result = agent.run(
             subject=subject,
             formats=formats,
-            time_range=time_range,
+            time_range=effective_time,
             depth=depth,
             max_hours=max_hours,
             on_dataset_stored=on_stored,
