@@ -370,6 +370,26 @@ def _extract_tool_calls(message) -> list[dict]:
     return calls
 
 
+def _compact_tool_result(data: object) -> str:
+    if isinstance(data, dict):
+        if data.get("skipped"):
+            return json.dumps({"skipped": True, "reason": data.get("reason", "")})
+        if data.get("rejected"):
+            return json.dumps({"rejected": True, "reason": data.get("reason", ""), "message": (data.get("message") or "")[:200]})
+        if data.get("success") is True:
+            return json.dumps({"success": True, "message": (data.get("message") or "OK")[:120]})
+        if data.get("error"):
+            return json.dumps({"error": (data.get("error") or "")[:200]})
+        if "done" in data:
+            return json.dumps({"done": True, "total": data.get("total", 0)})
+        result = {k: v for k, v in data.items() if isinstance(v, (str, int, float, bool))}
+        s = json.dumps(result, default=str)
+        return s[:300] if len(s) > 300 else s
+    if isinstance(data, list):
+        return json.dumps(f"[{len(data)} results]")
+    return json.dumps(data, default=str)[:300]
+
+
 def _select_available_model(client: ollama.Client, preferred: str) -> str:
     """Return preferred model if pulled, else first fallback that's available."""
     try:
@@ -396,6 +416,27 @@ class DatasetDiscoveryAgent:
         self.logger = logging.getLogger("datasets_explorer")
         self._client = ollama.Client(host=host or OLLAMA_HOST)
         self.model = _select_available_model(self._client, model or OLLAMA_MODEL)
+
+    @staticmethod
+    def _trim_context(messages: list) -> None:
+        MAX_MESSAGES = 36
+        if len(messages) <= MAX_MESSAGES:
+            return
+        head = messages[:2]
+        tail = messages[-(MAX_MESSAGES - 2):]
+        for i in range(len(tail)):
+            m = tail[i]
+            if m.get("role") != "tool" or not isinstance(m.get("content"), str):
+                continue
+            if len(m["content"]) <= 200:
+                continue
+            try:
+                data = json.loads(m["content"])
+                compact = _compact_tool_result(data)
+                tail[i] = {"role": "tool", "content": compact}
+            except (json.JSONDecodeError, TypeError, ValueError):
+                tail[i] = {"role": "tool", "content": json.dumps("[truncated]")}
+        messages[:] = head + tail
 
     def run(
         self,
@@ -735,8 +776,7 @@ class DatasetDiscoveryAgent:
                     )
                     messages.append({"role": "user", "content": reminder})
 
-                if len(messages) > 44:
-                    messages = messages[:2] + messages[-40:]
+                self._trim_context(messages)
 
         except KeyboardInterrupt:
             self.logger.info("Interrupted by user — saving state")
