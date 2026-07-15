@@ -62,3 +62,4 @@ def get_github_dataset_readme(repo_full_name: str) -> Optional[str]:
     except Exception as exc:
         logger.warning("Failed to fetch README for %s: %s", repo_full_name, exc)
     return None
+# feat/int-github-search: Refine int-github-search error handling
