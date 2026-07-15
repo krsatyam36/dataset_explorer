@@ -47,3 +47,4 @@ def search_pwc_datasets_by_task(task: str) -> List[dict]:
     return search_paperswithcode(task, limit=30)
 # feat/int-paperswithcode: Refine int-paperswithcode error handling
 # feat/int-paperswithcode: Add int-paperswithcode timeout config
+# feat/int-paperswithcode: Add int-paperswithcode rate limiting
