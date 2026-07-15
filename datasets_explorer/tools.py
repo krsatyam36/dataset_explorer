@@ -1414,3 +1414,4 @@ class ToolExecutor:
         )
         return {"done": True, "summary": inp.get("summary", ""), "total": inp.get("total_found", 0)}
 # feat/search-exclusion: Add search-exclusion helper function
+# feat/search-exclusion: Wire search-exclusion into search pipeline
