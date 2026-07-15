@@ -520,6 +520,7 @@ function pushFinding(d){
   findings.insertBefore(row, findings.firstChild);
   state.findingsCount += 1;
   $('findings-count').textContent = state.findingsCount;
+  applyFilter();
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
