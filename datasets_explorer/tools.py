@@ -789,6 +789,20 @@ class ToolExecutor:
         m = re.match(r"https?://www\.mdpi\.com/(\d+-\d+/\d+/\d+/\d+)/?$", url)
         if m:
             return f"https://www.mdpi.com/{m.group(1)}/pdf"
+        # ACM DL: dl.acm.org/doi/10.1145/... → dl.acm.org/doi/pdf/10.1145/...
+        m = re.match(r"(https?://dl\.acm\.org/doi/)(10\.1145/[\d.]+)", url, re.IGNORECASE)
+        if m:
+            return f"{m.group(1)}pdf/{m.group(2)}"
+        # Springer LNCS: link.springer.com/chapter/10.1007/... → link.springer.com/content/pdf/10.1007/...
+        m = re.match(r"(https?://link\.springer\.com)/(?:chapter|article)/(10\.1007/[^/]+)", url, re.IGNORECASE)
+        if m:
+            return f"{m.group(1)}/content/pdf/{m.group(2)}.pdf"
+        # NeurIPS: papers.nips.cc/.../hash/XXXXX → papers.nips.cc/.../file/XXXXX.pdf
+        m = re.match(r"(https?://papers\.nips\.cc/paper_files/paper/\d+/\w+/hash/)([^/]+)", url, re.IGNORECASE)
+        if m:
+            return f"{m.group(1).replace('/hash/', '/file/')}{m.group(2)}.pdf"
+        # CVF / openaccess.thecvf.com — serves PDF directly on the same URL
+        # No transform needed, the URL is already a PDF
         # If we have HTML, look for an explicit PDF link.
         if html:
             try:
