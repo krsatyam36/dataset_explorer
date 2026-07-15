@@ -259,3 +259,4 @@ def _render_dataset_detail(d: Dataset) -> None:
     console.print(Panel(details, title=f"Dataset #{d.id}"))
 # feat/cli-stats: Refine cli-stats CLI output
 # feat/cli-stats: Add cli-stats error messages
+# feat/cli-stats: Add cli-stats help examples
