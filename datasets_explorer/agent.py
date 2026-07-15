@@ -469,9 +469,10 @@ class DatasetDiscoveryAgent:
         search_done = False
         consecutive_no_calls = 0
 
+        effective_time = time_range or DEFAULT_DATE_RANGE
         self.logger.info(
             f"Starting search | model={self.model} | query_id={query_id} | "
-            f"subject={subject!r} | formats={formats} | time={time_range!r} | "
+            f"subject={subject!r} | formats={formats} | time={effective_time!r} | "
             f"depth={depth} | max_iters={max_iters} | hours={max_hours}"
         )
 
