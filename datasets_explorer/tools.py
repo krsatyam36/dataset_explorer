@@ -18,6 +18,7 @@ from .config import (
     PHASE_A_MIN_STORES,
     PHASE_A_MIN_PORTAL_SEARCHES,
     PORTAL_HOSTS,
+    EXCLUDE_KEYWORDS,
 )
 from .models import Dataset, DatasetSource
 from .storage import Storage
@@ -671,6 +672,20 @@ class ToolExecutor:
             href = r_.get("url")
             if href and href not in self._url_to_query:
                 self._url_to_query[href] = query
+        # Exclusion keyword filter: remove results matching EXCLUDE_KEYWORDS.
+        if EXCLUDE_KEYWORDS:
+            _excl = [k.strip().lower() for k in EXCLUDE_KEYWORDS.split(",") if k.strip()]
+            _before = len(ddg_results)
+            ddg_results = [
+                r for r in ddg_results
+                if not any(
+                    kw in (r.get("title","") + r.get("snippet","") + r.get("url","")).lower()
+                    for kw in _excl
+                )
+            ]
+            if _before > len(ddg_results):
+                logger.info(f"[web_search] Exclusion filter removed {_before - len(ddg_results)} results")
+
         # Phase-A bookkeeping: count this as a "portal search" if its site: filter
         # targets a known portal host.
         ql = query.lower()
