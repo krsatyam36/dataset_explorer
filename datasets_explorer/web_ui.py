@@ -526,14 +526,25 @@ function pushThinking(meta, text){
   while(thinkingPane.childElementCount > 200) thinkingPane.removeChild(thinkingPane.lastChild);
 }
 
+function trustBadge(label, ok, yesText, noText){
+  const v = ok ? yesText : noText;
+  return `<div class="dd-field"><span class="key">${label}</span><span class="val" style="color:${ok?'var(--good)':'var(--bad)'}">${v}</span></div>`;
+}
 function showDatasetDetail(d){
   const card = $('dd-card');
   if(!card) return;
+  const commOk = d.license_commercial_ok === true || d.license_commercial_ok === 'true' || d.license_commercial_ok === 1;
+  const hasDOI = !!(d.doi && d.doi!=='—');
+  const hasAuthors = !!(d.authors && d.authors!=='—');
+  const trustFields = trustBadge('Commercial Use', commOk, '✅ Yes', '❌ No/Unknown')
+    + trustBadge('Has DOI', hasDOI, '✅ Yes', '❌ No')
+    + trustBadge('Has Authors', hasAuthors, '✅ Yes', '❌ No');
   const fields = [
     ['Name', d.name||'—'],
     ['URL', `<a href="${escapeHtml(d.url||'')}" target="_blank">${escapeHtml(d.url||'')}</a>`],
     ['Download URL', d.download_url !== d.url ? `<a href="${escapeHtml(d.download_url||'')}" target="_blank">${escapeHtml(d.download_url||'')}</a>` : 'Same as URL'],
-    ['Relevance Score', (d.relevance_score||0).toFixed(2)],
+    ['Relevance Score', `<span style="color:${d.relevance_score>=0.8?'var(--good)':d.relevance_score>=0.5?'var(--warn)':'var(--bad)'}">${(d.relevance_score||0).toFixed(2)}</span>`],
+    ['Reasoning', escapeHtml(d.relevance_reasoning||'—')],
     ['License SPDX', d.license_spdx||'—'],
     ['Country', d.country||'—'],
     ['Institution', d.institution||'—'],
@@ -541,11 +552,16 @@ function showDatasetDetail(d){
     ['Source', d.source||'—'],
     ['Formats', (d.formats||[]).join(', ')||'—'],
     ['Size', d.size_human||'—'],
-    ['Description', d.description||'—'],
+    ['Num Samples', d.num_samples!=null ? d.num_samples.toLocaleString() : '—'],
+    ['Description', escapeHtml((d.description||'').slice(0,300))],
   ];
   card.innerHTML = `<h3>${escapeHtml(d.name||'')}</h3>
     <div class="dd-url"><a href="${escapeHtml(d.url||'')}" target="_blank">${escapeHtml(d.url||'')}</a></div>
-    ${fields.filter(f=>f[0]!=='Name'&&f[0]!=='URL').map(f=>`<div class="dd-field"><span class="key">${f[0]}</span><span class="val">${f[1]}</span></div>`).join('')}
+    <div style="margin:10px 0;padding:10px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Trust Card</div>
+      ${trustFields}
+    </div>
+    ${fields.filter(f=>f[0]!=='Name'&&f[0]!=='URL'&&f[0]!=='Relevance Score'&&f[0]!=='Reasoning').map(f=>`<div class="dd-field"><span class="key">${f[0]}</span><span class="val">${f[1]}</span></div>`).join('')}
     <button class="dd-close" onclick="document.getElementById('dd-overlay').classList.remove('open')">Close</button>`;
   $('dd-overlay').classList.add('open');
 }
