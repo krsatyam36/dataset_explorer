@@ -232,3 +232,4 @@ def _render_dataset_detail(d: Dataset) -> None:
     console.print(Panel(details, title=f"Dataset #{d.id}"))
 # feat/cli-interactive: Refine cli-interactive CLI output
 # feat/cli-interactive: Add cli-interactive error messages
+# feat/cli-interactive: Add cli-interactive help examples
