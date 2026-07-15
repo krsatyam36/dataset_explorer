@@ -19,6 +19,7 @@ class RateLimiter:
         "earthdata.nasa.gov": 3.0,
         "earthexplorer.usgs.gov": 4.0,
         "paperswithcode.com": 2.0,
+        "arxiv.org": 3.5,
         "default": 1.5,
         "ddg": 2.0,
     }
