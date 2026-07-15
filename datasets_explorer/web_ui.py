@@ -9,6 +9,8 @@ connected to /events receives them in real time.
 """
 from __future__ import annotations
 
+import csv
+import io
 import json
 import logging
 import threading
@@ -60,6 +62,7 @@ _broker = Broker()
 _server_thread: Optional[threading.Thread] = None
 _server: Optional[ThreadingHTTPServer] = None
 _server_port: Optional[int] = None
+_storage: Any = None  # set by start() for export endpoint
 
 # Model-switch coordination. The web UI writes here; the agent loop polls
 # `consume_model_switch()` at the top of each iteration.
@@ -99,6 +102,8 @@ def _make_handler():
                 self._serve_html()
             elif self.path == "/events":
                 self._serve_sse()
+            elif self.path == "/export/csv":
+                self._serve_export_csv()
             elif self.path == "/models":
                 self._serve_models()
             else:
@@ -109,6 +114,40 @@ def _make_handler():
                 self._serve_switch_model()
             else:
                 self.send_error(404)
+
+        def _serve_export_csv(self):
+            try:
+                from .storage import Storage
+                from .config import DB_PATH
+                s = Storage(DB_PATH)
+                rows = s.get_datasets(limit=10000, min_relevance=0.0)
+            except Exception:
+                rows = []
+            buf = io.StringIO()
+            w = csv.writer(buf)
+            w.writerow(["id","name","url","download_url","source","formats","size_human","license","license_spdx","license_commercial_ok","doi","authors","institution","country","relevance_score","relevance_reasoning","description","tags","num_samples","query_id","discovered_at","reviewed"])
+            for r in rows:
+                w.writerow([
+                    getattr(r, "id", ""), getattr(r, "name", ""), getattr(r, "url", ""),
+                    getattr(r, "download_url", ""), getattr(r, "source", ""),
+                    ",".join(f.value if hasattr(f,"value") else str(f) for f in (getattr(r,"formats",None) or [])),
+                    getattr(r, "size_human", ""), getattr(r, "license", ""),
+                    getattr(r, "license_spdx", ""), getattr(r, "license_commercial_ok", ""),
+                    getattr(r, "doi", ""), getattr(r, "authors", ""),
+                    getattr(r, "institution", ""), getattr(r, "country", ""),
+                    getattr(r, "relevance_score", ""), getattr(r, "relevance_reasoning", ""),
+                    getattr(r, "description", ""), ",".join(getattr(r,"tags",None) or []),
+                    getattr(r, "num_samples", ""), getattr(r, "query_id", ""),
+                    str(getattr(r, "discovered_at", "")), getattr(r, "reviewed", ""),
+                ])
+            body = buf.getvalue().encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/csv; charset=utf-8")
+            self.send_header("Content-Disposition", "attachment; filename=datasets_export.csv")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
 
         def _serve_models(self):
             try:
@@ -261,6 +300,8 @@ header .subject{font-family:var(--mono);color:var(--text);background:var(--panel
 header .status{margin-left:auto;display:flex;align-items:center;gap:14px}
 header .status .pill{padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--panel-2);font-family:var(--mono);font-size:12px;color:var(--muted)}
 header .status .live{color:var(--good)}
+.export-btn{background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:4px 10px;border-radius:5px;font-family:var(--mono);font-size:11px;cursor:pointer}
+.export-btn:hover{background:var(--border)}
 #model-select{background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:12px;padding:1px 4px;outline:none}
 #model-select:hover{border-color:var(--accent)}
 #model-pill{display:inline-flex;align-items:center;gap:6px}
@@ -347,6 +388,7 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
     </span>
     <span class="pill" id="depth">depth: —</span>
     <span class="pill live" id="live">live</span>
+    <button class="export-btn" id="export-btn" title="Export all datasets as CSV">⬇ CSV</button>
     <span class="pill" id="elapsed">T+00m00s</span>
   </div>
 </header>
@@ -656,6 +698,15 @@ $('model-select').addEventListener('change', (e) => {
 });
 loadModels();
 setInterval(loadModels, 30000);  // refresh in case the user pulls a new model
+
+$('export-btn').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.href = '/export/csv';
+  a.download = 'datasets_export.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+});
 
 function connect(){
   const es = new EventSource('/events');
