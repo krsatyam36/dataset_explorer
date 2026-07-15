@@ -330,8 +330,11 @@ main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
 .sites .chip .n{color:var(--muted);font-size:11px}
 
 footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid var(--border);font-family:var(--mono);text-align:right}
-.dataset-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;display:none;align-items:center;justify-content:center}
+.dataset-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;display:none;align-items:center;justify-content:center;animation:fadeIn .15s ease}
 .dataset-detail-overlay.open{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.dataset-detail-card{animation:slideUp .2s ease}
 .dataset-detail-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:24px;width:600px;max-width:92vw;max-height:80vh;overflow-y:auto}
 .dataset-detail-card h3{margin:0 0 6px;font-size:15px;color:var(--text)}
 .dataset-detail-card .dd-url{word-break:break-all;color:var(--accent);font-family:var(--mono);font-size:12px;margin-bottom:14px}
