@@ -23,11 +23,12 @@ DATA_DIR = Path(os.environ.get("DATASET_SEARCH_DIR", str(Path.home() / ".dataset
 DB_PATH = DATA_DIR / "results.db"
 LOG_DIR = DATA_DIR / "logs"
 
-# CSV scrape output location — fixed path inside the project tree, NOT under DATA_DIR.
+# CSV scrape output location — relative to project root, NOT under DATA_DIR.
 # One CSV per run, filename ddmmyy-hhmmss_scrape.csv (local time at run start).
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CSV_DIR = Path(os.environ.get(
     "DATASET_SEARCH_CSV_DIR",
-    str(Path.home() / "datasets_explorer" / "logs" / "csv"),
+    str(_PROJECT_ROOT / "logs" / "csv"),
 ))
 
 # Defaults for the search agent
