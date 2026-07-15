@@ -11,9 +11,11 @@ from __future__ import annotations
 
 import json
 import logging
+import shlex
 import threading
 import time
 import queue
+import subprocess
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Optional
 
@@ -107,6 +109,8 @@ def _make_handler():
         def do_POST(self):  # noqa: N802
             if self.path == "/switch-model":
                 self._serve_switch_model()
+            elif self.path == "/start-search":
+                self._serve_start_search()
             else:
                 self.send_error(404)
 
@@ -145,6 +149,32 @@ def _make_handler():
             request_model_switch(name)
             _broker.publish({"type": "model_switch_requested", "model": name})
             body = json.dumps({"ok": True, "model": name}).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def _serve_start_search(self):
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                payload = json.loads(self.rfile.read(length).decode("utf-8") or "{}")
+                subject = (payload.get("subject") or "").strip()
+                depth = str(payload.get("depth", "2"))
+                fmt = (payload.get("format") or "").strip()
+            except Exception:
+                subject = ""
+            if not subject:
+                self.send_error(400, "missing 'subject' in body")
+                return
+            cmd = f"dataset_search {shlex.quote(subject)} --depth {depth}"
+            if fmt and fmt != "all":
+                for f in fmt.split(","):
+                    f = f.strip()
+                    if f:
+                        cmd += f" --format {shlex.quote(f)}"
+            _broker.publish({"type": "new_search_started", "subject": subject, "depth": depth, "format": fmt, "cmd": cmd})
+            body = json.dumps({"ok": True, "cmd": cmd, "subject": subject, "depth": depth}).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
@@ -330,6 +360,21 @@ main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
 .sites .chip .n{color:var(--muted);font-size:11px}
 
 footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid var(--border);font-family:var(--mono);text-align:right}
+.new-search-btn{background:var(--accent);color:var(--bg);border:none;padding:4px 12px;border-radius:5px;font-family:var(--mono);font-size:11px;cursor:pointer;font-weight:600}
+.new-search-btn:hover{opacity:.85}
+.search-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;display:none;align-items:center;justify-content:center}
+.search-overlay.open{display:flex}
+.search-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:24px;width:480px;max-width:90vw}
+.search-card h3{margin:0 0 14px;font-size:14px;color:var(--accent)}
+.search-card label{display:block;margin-bottom:4px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.search-card input,.search-card select{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-family:var(--mono);font-size:13px;margin-bottom:12px;outline:none}
+.search-card input:focus,.search-card select:focus{border-color:var(--accent)}
+.search-card .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.search-card .actions button{padding:6px 18px;border-radius:6px;border:none;cursor:pointer;font-family:var(--sans);font-size:13px}
+.search-card .actions .primary{background:var(--accent);color:var(--bg);font-weight:600}
+.search-card .actions .primary:hover{opacity:.85}
+.search-card .actions .cancel{background:var(--panel-2);color:var(--text);border:1px solid var(--border)}
+.search-card .actions .cancel:hover{background:var(--border)}
 
 @media (max-width: 1100px){main,.lower{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}}
 </style>
@@ -347,6 +392,7 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
     </span>
     <span class="pill" id="depth">depth: —</span>
     <span class="pill live" id="live">live</span>
+  <button class="new-search-btn" id="new-search-btn" title="Start a new search">+ New</button>
     <span class="pill" id="elapsed">T+00m00s</span>
   </div>
 </header>
@@ -392,6 +438,22 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
 </section>
 
 <footer>events stream over Server-Sent Events · keep this tab open during the run</footer>
+
+<div class="search-overlay" id="search-overlay">
+  <div class="search-card">
+    <h3>New dataset search</h3>
+    <label for="search-subject">Subject *</label>
+    <input id="search-subject" placeholder="e.g. military aircraft satellite imagery" autofocus />
+    <label for="search-depth">Depth</label>
+    <select id="search-depth"><option value="2">2 — deep (default)</option><option value="1">1 — fast</option><option value="3">3 — frontier</option></select>
+    <label for="search-format">Format</label>
+    <input id="search-format" placeholder="all, geotiff,tiff, npy, csv…" />
+    <div class="actions">
+      <button class="cancel" onclick="closeSearchForm()">Cancel</button>
+      <button class="primary" onclick="submitSearchForm()">Search</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const ICONS = {
@@ -656,6 +718,25 @@ $('model-select').addEventListener('change', (e) => {
 });
 loadModels();
 setInterval(loadModels, 30000);  // refresh in case the user pulls a new model
+
+function openSearchForm(){ $('search-overlay').classList.add('open'); setTimeout(()=>$('search-subject').focus(),100); }
+function closeSearchForm(){ $('search-overlay').classList.remove('open'); }
+function submitSearchForm(){
+  const sub = $('search-subject').value.trim();
+  if(!sub) return;
+  const depth = $('search-depth').value;
+  const fmt = $('search-format').value.trim();
+  let cmd = `dataset_search "${sub}" --depth ${depth}`;
+  if(fmt && fmt!=='all') cmd += ` --format ${fmt}`;
+  closeSearchForm();
+  pushRow('search', '🚀', `Starting: <code style="background:var(--panel-2);padding:1px 6px;border-radius:3px;font-size:11px">${escapeHtml(cmd)}</code>`, {});
+  setTimeout(() => { window.open('', '_self'); window.location.href = 'about:blank'; }, 500);
+}
+$('new-search-btn').addEventListener('click', openSearchForm);
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape' && $('search-overlay').classList.contains('open')) closeSearchForm();
+  if(e.key==='Enter' && $('search-overlay').classList.contains('open') && document.activeElement===$('search-subject')) submitSearchForm();
+});
 
 function connect(){
   const es = new EventSource('/events');
