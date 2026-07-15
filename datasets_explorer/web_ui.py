@@ -275,7 +275,9 @@ header .status .live::before{content:'';display:inline-block;width:8px;height:8p
 .kpi .lbl{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
 .kpi .val{font-family:var(--mono);font-size:20px;margin-top:2px}
 .kpi .sub{color:var(--muted);font-size:11px;margin-top:1px}
-.kpi-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px);background:var(--panel-2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:11px;color:var(--muted);white-space:nowrap;z-index:10;opacity:0;visibility:hidden;transition:all .2s;max-width:280px;white-space:normal;pointer-events:none}
+.kpi-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px);background:var(--panel-2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:11px;color:var(--muted);white-space:nowrap;z-index:10;opacity:0;visibility:hidden;transition:all .2s;max-width:280px;white-space:normal;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.kpi:nth-child(-n+3) .kpi-tip{bottom:auto;top:calc(100% + 8px)}
+.kpi:nth-child(-n+3) .kpi-tip::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--border)}
 .kpi-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--border)}
 
 main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
