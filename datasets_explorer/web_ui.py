@@ -264,6 +264,10 @@ header .status .live{color:var(--good)}
 #model-select{background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:12px;padding:1px 4px;outline:none}
 #model-select:hover{border-color:var(--accent)}
 #model-pill{display:inline-flex;align-items:center;gap:6px}
+.model-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--good);box-shadow:0 0 6px rgba(158,206,106,.5);transition:background .3s}
+.model-dot.idle{background:var(--warn);box-shadow:0 0 6px rgba(224,175,104,.5)}
+.model-dot.off{background:var(--bad);box-shadow:0 0 6px rgba(247,118,142,.5)}
+.model-info{font-size:10px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @keyframes spin{to{transform:rotate(360deg)}}
 #model-switching{display:inline-block;animation:spin 1s linear infinite}
 header .status .live::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--good);margin-right:6px;box-shadow:0 0 0 0 rgba(158,206,106,.7);animation:pulse 1.5s infinite}
@@ -340,9 +344,11 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
   <div class="subject" id="subject">—</div>
   <div class="status">
     <span class="pill" id="model-pill">
-      model: <select id="model-select" title="Switch model on the fly — full history is preserved">
+      <span class="model-dot" id="model-dot"></span>
+      <select id="model-select" title="Switch model on the fly — full history is preserved">
         <option value="">—</option>
       </select>
+      <span class="model-info" id="model-info" title="Model details"></span>
       <span id="model-switching" style="display:none;color:var(--accent-2);margin-left:6px">↻</span>
     </span>
     <span class="pill" id="depth">depth: —</span>
