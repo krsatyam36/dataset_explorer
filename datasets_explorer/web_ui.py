@@ -359,6 +359,7 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
   .kpi .lbl{font-size:10px}
   #model-select{max-width:100px;font-size:10px}
 }
+@media print{header,.kpis,.lower,footer{display:none}main{display:block;padding:0} .panel{border:none;break-inside:avoid}}
 </style>
 </head>
 <body>
