@@ -265,6 +265,7 @@ header .status .live{color:var(--good)}
 #model-select:hover{border-color:var(--accent)}
 #model-pill{display:inline-flex;align-items:center;gap:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes copyPop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
 #model-switching{display:inline-block;animation:spin 1s linear infinite}
 header .status .live::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--good);margin-right:6px;box-shadow:0 0 0 0 rgba(158,206,106,.7);animation:pulse 1.5s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(158,206,106,.7)}70%{box-shadow:0 0 0 8px rgba(158,206,106,0)}100%{box-shadow:0 0 0 0 rgba(158,206,106,0)}}
@@ -316,7 +317,7 @@ main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
 .findings .url a:hover{text-decoration:underline}
 .copy-btn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;background:var(--panel-2);border:1px solid var(--border);cursor:pointer;font-size:11px;color:var(--muted);vertical-align:middle;flex-shrink:0;transition:all .15s}
 .copy-btn:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
-.copy-btn.done{background:var(--good);color:var(--bg);border-color:var(--good)}
+.copy-btn.done{background:var(--good);color:var(--bg);border-color:var(--good);animation:copyPop .3s ease}
 .findings .meta{color:var(--muted);font-size:11px;margin-top:3px}
 .findings .meta .tag{display:inline-block;background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;margin-right:5px}
 
