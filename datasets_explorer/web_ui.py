@@ -326,7 +326,9 @@ main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
 .thinking-list details pre{margin:0;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;white-space:pre-wrap;color:var(--text);max-height:280px;overflow:auto}
 
 .timeline{font-family:var(--mono);font-size:11px;padding:10px 14px}
-.timeline .tl-item{display:flex;gap:8px;padding:3px 0;align-items:flex-start;border-left:2px solid var(--border);padding-left:12px;margin-left:6px;position:relative}
+.timeline .tl-item{display:flex;gap:8px;padding:3px 0;align-items:flex-start;border-left:2px solid var(--border);padding-left:12px;margin-left:6px;position:relative;cursor:default}
+.timeline .tl-item:hover{background:rgba(122,162,247,0.04)}
+.timeline .tl-item:hover .tl-name{color:var(--accent)}
 .timeline .tl-item::before{content:'';position:absolute;left:-7px;top:7px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--bg)}
 .timeline .tl-item .tl-time{color:var(--muted);font-size:10px;white-space:nowrap;min-width:80px}
 .timeline .tl-item .tl-name{color:var(--text);word-break:break-all}
