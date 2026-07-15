@@ -524,6 +524,7 @@ function playSound(type){
   if(_muted) return;
   if(type==='done'){ beep(660,0.12); setTimeout(()=>beep(880,0.2),140); }
   else if(type==='store'){ beep(520,0.08); }
+  else if(type==='warn'){ beep(300,0.1); }
 }
 function toggleSound(){
   _muted = !_muted;
@@ -614,7 +615,7 @@ function applyEvent(ev){
     setNow(ic, body, ev);
     return;
   }
-  if(ev.type === 'tool_result'){
+  if(ev.type === 'tool_result'){ playSound('warn');
     const ic = ev.status === 'rejected' ? '⛔' : '⚠️';
     const cls = ev.status === 'rejected' ? 'rejected' : 'error';
     const msg = (ev.message||'').slice(0,260);
