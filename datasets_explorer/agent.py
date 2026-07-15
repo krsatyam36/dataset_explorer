@@ -798,3 +798,4 @@ class DatasetDiscoveryAgent:
                 pass
         return query
 # feat/agent-self-reflection: Refine agent-self-reflection implementation
+# feat/agent-self-reflection: Add agent-self-reflection config option
