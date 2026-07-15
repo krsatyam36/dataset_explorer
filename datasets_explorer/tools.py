@@ -1413,3 +1413,4 @@ class ToolExecutor:
             f"summary={str(inp.get('summary', ''))[:100]}"
         )
         return {"done": True, "summary": inp.get("summary", ""), "total": inp.get("total_found", 0)}
+# feat/search-exclusion: Add search-exclusion helper function
