@@ -23,6 +23,11 @@ class Storage:
             (query_id,) if query_id else (),
         ).fetchall()
         data = [dict(r) for r in rows]
+        for d in data:
+            d.pop("id", None)
+            for k in ("discovered_at",):
+                if k in d and d[k]:
+                    d[k] = str(d[k])
         path.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
         logger.info(f"Exported {len(data)} datasets to {path}")
         return path
