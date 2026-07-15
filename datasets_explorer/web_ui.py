@@ -134,6 +134,16 @@ def _make_handler():
                     rows = s.get_datasets(limit=10000, min_relevance=0.0)
             except Exception:
                 rows = []
+            if not rows:
+                body = b"name,url,relevance_score\n"
+                self.send_response(200)
+                self.send_header("Content-Type", "text/csv; charset=utf-8")
+                self.send_header("Content-Disposition", "attachment; filename=datasets_export.csv")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(body)
+                return
             buf = io.StringIO()
             w = csv.writer(buf)
             w.writerow(["id","name","url","download_url","source","formats","size_human","license","license_spdx","license_commercial_ok","doi","authors","institution","country","relevance_score","relevance_reasoning","description","tags","num_samples","query_id","discovered_at","reviewed"])
