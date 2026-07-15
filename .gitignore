@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+data/
+datasets_explorer.egg-info/
+logs/
+*.db
