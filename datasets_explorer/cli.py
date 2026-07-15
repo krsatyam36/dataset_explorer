@@ -125,6 +125,33 @@ def results(query_id, min_relevance, fmt, limit, unreviewed):
 
 
 @cli.command()
+def stats():
+    """Show aggregate statistics across all search sessions."""
+    storage = Storage(DB_PATH)
+    qs = storage.list_queries()
+    all_ds = storage.get_datasets(limit=10_000)
+    total = len(all_ds)
+    reviewed_count = sum(1 for d in all_ds if d.reviewed)
+    unreviewed_count = total - reviewed_count
+    sources = {}
+    fmt_count = {}
+    for d in all_ds:
+        sources[d.source.value] = sources.get(d.source.value, 0) + 1
+        for f in d.formats:
+            fmt_count[f] = fmt_count.get(f, 0) + 1
+
+    grid = Table.grid(padding=(0, 4))
+    grid.add_column(style="bold")
+    grid.add_column()
+    grid.add_row("Sessions",  str(len(qs)))
+    grid.add_row("Datasets",  str(total))
+    grid.add_row("Reviewed",  str(reviewed_count))
+    grid.add_row("Unreviewed", str(unreviewed_count))
+    grid.add_row("Sources",   ", ".join(f"{s} ({c})" for s, c in sorted(sources.items())))
+    grid.add_row("Formats",   ", ".join(f"{f} ({c})" for f, c in sorted(fmt_count.items())))
+    console.print(Panel(grid, title="Datasets Explorer Stats"))
+
+@cli.command()
 def queries():
     """List all past search sessions."""
     storage = Storage(DB_PATH)
