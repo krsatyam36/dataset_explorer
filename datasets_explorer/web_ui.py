@@ -332,6 +332,10 @@ main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
 footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid var(--border);font-family:var(--mono);text-align:right}
 
 @media (max-width: 1100px){main,.lower{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}}
+.filter-bar{display:flex;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+.filter-bar input,.filter-bar select{background:var(--panel-2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:11px;padding:4px 8px;outline:none;flex:1;min-width:100px}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent)}
+.filter-bar .fc{color:var(--muted);font-size:10px;font-family:var(--mono)}
 </style>
 </head>
 <body>
@@ -375,6 +379,7 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
     </div>
     <div class="panel">
       <h2>Confirmed datasets <span class="count" id="findings-count">0</span></h2>
+      <div class="filter-bar"><input id="filter-input" placeholder="🔍 Filter by name, source, license…" /><select id="filter-source"><option value="">All sources</option><option value="kaggle">Kaggle</option><option value="huggingface">HuggingFace</option><option value="github">GitHub</option><option value="zenodo">Zenodo</option><option value="papers_with_code">PapersWithCode</option><option value="figshare">Figshare</option><option value="roboflow">Roboflow</option><option value="ieee">IEEE</option><option value="nasa">NASA</option><option value="usgs">USGS</option><option value="generic">Generic</option></select><span class="fc" id="filter-count"></span></div>
       <div class="body findings" id="findings"></div>
     </div>
   </section>
@@ -467,6 +472,22 @@ function setNow(ic, txt, meta){
       `iter ${meta.iteration ?? '—'} · ${fmtElapsed(meta.elapsed)}`;
   }
 }
+
+function applyFilter(){
+  const q = ($('filter-input').value||'').toLowerCase();
+  const src = ($('filter-source').value||'').toLowerCase();
+  let visible = 0;
+  findings.querySelectorAll('.row').forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const match = (!q || text.includes(q)) && (!src || text.includes(src));
+    row.style.display = match ? '' : 'none';
+    if(match) visible++;
+  });
+  const fc = $('filter-count');
+  if(fc) fc.textContent = visible + ' shown';
+}
+$('filter-input').addEventListener('input', applyFilter);
+$('filter-source').addEventListener('change', applyFilter);
 
 function pushFinding(d){
   const score = (d.relevance_score ?? 0).toFixed(2);
