@@ -520,6 +520,19 @@ function beep(freq, dur, vol){
   } catch(e){} // audio not supported
 }
 let _muted = localStorage.getItem('soundMuted')==='1';
+let _volume = parseFloat(localStorage.getItem('soundVolume')||'0.08');
+function beep(freq, dur, vol){
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = freq;
+    osc.type = 'sine';
+    gain.gain.value = (vol!=null ? vol : _volume);
+    osc.start(); osc.stop(ctx.currentTime + (dur||0.15));
+  } catch(e){}
+}
 function playSound(type){
   if(_muted) return;
   if(type==='done'){ beep(660,0.12); setTimeout(()=>beep(880,0.2),140); }
