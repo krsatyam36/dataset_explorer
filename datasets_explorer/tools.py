@@ -385,6 +385,7 @@ class ToolExecutor:
             import numpy as np
             import ollama
             client = ollama.Client(host=OLLAMA_HOST)
+            logger.info(f"[rerank] Computing embedding for query ({len(results)} results)")
             q_emb = client.embeddings(model="nomic-embed-text", prompt=query)["embedding"]
             for r in results:
                 text = f"{r.get('title','')} {r.get('snippet','')} {r.get('url','')}"
