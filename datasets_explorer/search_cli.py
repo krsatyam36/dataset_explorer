@@ -199,10 +199,18 @@ def main(
                         "url": d.url,
                         "download_url": d.download_url,
                         "relevance_score": d.relevance_score,
+                        "relevance_reasoning": d.relevance_reasoning,
                         "license_spdx": d.license_spdx,
                         "country": d.country,
                         "institution": d.institution,
                         "doi": d.doi,
+                        "source": d.source.value if hasattr(d.source, 'value') else str(d.source),
+                        "formats": [f.value if hasattr(f, 'value') else str(f) for f in (d.formats or [])],
+                        "size_human": d.size_human,
+                        "description": d.description or '',
+                        "license_commercial_ok": d.license_commercial_ok,
+                        "authors": d.authors or '',
+                        "num_samples": d.num_samples,
                     },
                 })
             except Exception:

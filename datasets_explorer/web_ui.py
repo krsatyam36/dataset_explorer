@@ -330,6 +330,18 @@ main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
 .sites .chip .n{color:var(--muted);font-size:11px}
 
 footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid var(--border);font-family:var(--mono);text-align:right}
+.dataset-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;display:none;align-items:center;justify-content:center}
+.dataset-detail-overlay.open{display:flex}
+.dataset-detail-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:24px;width:600px;max-width:92vw;max-height:80vh;overflow-y:auto}
+.dataset-detail-card h3{margin:0 0 6px;font-size:15px;color:var(--text)}
+.dataset-detail-card .dd-url{word-break:break-all;color:var(--accent);font-family:var(--mono);font-size:12px;margin-bottom:14px}
+.dataset-detail-card .dd-url a{color:inherit;text-decoration:none}
+.dataset-detail-card .dd-url a:hover{text-decoration:underline}
+.dataset-detail-card .dd-field{display:grid;grid-template-columns:140px 1fr;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.dataset-detail-card .dd-field .key{color:var(--muted);font-family:var(--mono);font-size:11px}
+.dataset-detail-card .dd-field .val{color:var(--text);word-break:break-all}
+.dataset-detail-card .dd-close{background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:6px 16px;border-radius:6px;cursor:pointer;margin-top:14px;font-family:var(--sans);font-size:13px}
+.dataset-detail-card .dd-close:hover{background:var(--border)}
 
 @media (max-width: 1100px){main,.lower{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}}
 </style>
@@ -390,6 +402,8 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
     <div class="body"><div class="sites" id="sites"></div></div>
   </div>
 </section>
+
+<div class="dataset-detail-overlay" id="dd-overlay"><div class="dataset-detail-card" id="dd-card"></div></div>
 
 <footer>events stream over Server-Sent Events · keep this tab open during the run</footer>
 
@@ -481,6 +495,9 @@ function pushFinding(d){
   const meta = tags.length ? `<div class="meta">${tags.join(' ')}</div>` : '';
   const row = document.createElement('div');
   row.className = 'row';
+  row.style.cursor = 'pointer';
+  row.title = 'Click for details';
+  row.addEventListener('click', () => showDatasetDetail(d));
   row.innerHTML = `
     <div class="score ${cls}">${score}</div>
     <div>
@@ -505,6 +522,32 @@ function pushThinking(meta, text){
   $('thinking-count').textContent = state.thinkingCount;
   while(thinkingPane.childElementCount > 200) thinkingPane.removeChild(thinkingPane.lastChild);
 }
+
+function showDatasetDetail(d){
+  const card = $('dd-card');
+  if(!card) return;
+  const fields = [
+    ['Name', d.name||'—'],
+    ['URL', `<a href="${escapeHtml(d.url||'')}" target="_blank">${escapeHtml(d.url||'')}</a>`],
+    ['Download URL', d.download_url !== d.url ? `<a href="${escapeHtml(d.download_url||'')}" target="_blank">${escapeHtml(d.download_url||'')}</a>` : 'Same as URL'],
+    ['Relevance Score', (d.relevance_score||0).toFixed(2)],
+    ['License SPDX', d.license_spdx||'—'],
+    ['Country', d.country||'—'],
+    ['Institution', d.institution||'—'],
+    ['DOI', d.doi||'—'],
+    ['Source', d.source||'—'],
+    ['Formats', (d.formats||[]).join(', ')||'—'],
+    ['Size', d.size_human||'—'],
+    ['Description', d.description||'—'],
+  ];
+  card.innerHTML = `<h3>${escapeHtml(d.name||'')}</h3>
+    <div class="dd-url"><a href="${escapeHtml(d.url||'')}" target="_blank">${escapeHtml(d.url||'')}</a></div>
+    ${fields.filter(f=>f[0]!=='Name'&&f[0]!=='URL').map(f=>`<div class="dd-field"><span class="key">${f[0]}</span><span class="val">${f[1]}</span></div>`).join('')}
+    <button class="dd-close" onclick="document.getElementById('dd-overlay').classList.remove('open')">Close</button>`;
+  $('dd-overlay').classList.add('open');
+}
+$('dd-overlay').addEventListener('click', e => { if(e.target===$('dd-overlay')) $('dd-overlay').classList.remove('open'); });
+document.addEventListener('keydown', e => { if(e.key==='Escape' && $('dd-overlay').classList.contains('open')) $('dd-overlay').classList.remove('open'); });
 
 function applyEvent(ev){
   if(ev.type === 'run_start'){
