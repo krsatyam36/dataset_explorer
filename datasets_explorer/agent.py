@@ -791,3 +791,4 @@ class DatasetDiscoveryAgent:
             except Exception:
                 pass
         return query
+# feat/agent-adaptive-depth: Refine agent-adaptive-depth implementation
