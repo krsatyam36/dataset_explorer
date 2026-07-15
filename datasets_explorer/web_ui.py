@@ -460,6 +460,7 @@ function pushRow(kind, ic, html, meta){
   const row = document.createElement('div');
   row.className = 'row ' + kind;
   row.innerHTML = `<span class="t">[${t} · ${it}]</span><span class="ic">${ic}</span><span class="body">${html}</span>`;
+  if(_streamFilter) row.style.display = row.textContent.toLowerCase().includes(_streamFilter) ? '' : 'none';
   stream.appendChild(row);
   state.streamCount += 1;
   $('stream-count').textContent = state.streamCount;
