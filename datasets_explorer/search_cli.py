@@ -96,6 +96,11 @@ DEPTH_DESCRIPTIONS = {
     show_default=True,
     help="Port for the web dashboard.",
 )
+@click.option(
+    "--sources",
+    default="",
+    help='Comma-separated allowed sources: web,arxiv,zenodo,pdf,github. Empty=all.',
+)
 def main(
     subject: str,
     fmt: str,
@@ -107,6 +112,7 @@ def main(
     min_relevance: float,
     web: bool,
     web_port: int,
+    sources: str,
 ):
     """Find datasets matching SUBJECT by autonomously scanning the internet.
 
@@ -123,6 +129,9 @@ def main(
         formats = [f.strip().lower() for f in fmt.split(",") if f.strip()]
 
     max_hours = None if unlimited else hours
+    if sources:
+        import datasets_explorer.config as cfg
+        cfg.ALLOWED_SOURCES = sources
 
     storage = Storage(DB_PATH)
     agent = DatasetDiscoveryAgent(storage, model=model)

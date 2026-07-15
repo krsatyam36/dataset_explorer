@@ -67,3 +67,5 @@ PORTAL_HOSTS = (
     "data.gov", "catalog.data.gov", "registry.opendata.aws",
     "european-data.europa.eu", "data.gov.uk", "data.gc.ca",
 )
+
+ALLOWED_SOURCES = os.environ.get("ALLOWED_SOURCES", "").strip()

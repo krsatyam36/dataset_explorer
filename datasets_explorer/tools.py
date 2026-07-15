@@ -18,6 +18,7 @@ from .config import (
     PHASE_A_MIN_STORES,
     PHASE_A_MIN_PORTAL_SEARCHES,
     PORTAL_HOSTS,
+    ALLOWED_SOURCES,
 )
 from .models import Dataset, DatasetSource
 from .storage import Storage
@@ -388,6 +389,16 @@ class ToolExecutor:
             "store_dataset": self._store_dataset,
             "mark_search_complete": self._mark_search_complete,
         }
+        if ALLOWED_SOURCES:
+            _source_map = {
+                "web_search": "web", "fetch_page": "web", "fetch_page_js": "web",
+                "arxiv_search": "arxiv", "zenodo_search": "zenodo",
+                "read_pdf": "pdf", "read_github_readme": "github",
+            }
+            allowed = {s.strip().lower() for s in ALLOWED_SOURCES.split(",") if s.strip()}
+            required = _source_map.get(tool_name, "")
+            if required and required not in allowed:
+                return {"rejected": True, "error": f"Source '{required}' is not in allowed sources: {ALLOWED_SOURCES}"}
         fn = dispatch.get(tool_name)
         if fn is None:
             return {"error": f"Unknown tool: {tool_name}"}
