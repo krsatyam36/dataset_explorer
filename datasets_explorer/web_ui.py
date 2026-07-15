@@ -503,6 +503,12 @@ document.addEventListener('click', e => {
     copyText(text, btn);
   }
 });
+document.addEventListener('keydown', e => {
+  if((e.ctrlKey||e.metaKey) && e.key==='c' && e.target===document.body){
+    const lastUrl = document.querySelector('.findings .url a:last-child');
+    if(lastUrl) copyText(lastUrl.href, document.querySelector('.findings .copy-btn:last-child'));
+  }
+});
 function showToast(msg, color){
   const t = document.createElement('div');
   t.textContent = msg;
