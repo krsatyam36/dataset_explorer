@@ -379,7 +379,7 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
     </div>
     <div class="panel">
       <h2>Confirmed datasets <span class="count" id="findings-count">0</span></h2>
-      <div class="filter-bar"><input id="filter-input" placeholder="🔍 Filter by name, source, license…" /><select id="filter-source"><option value="">All sources</option><option value="kaggle">Kaggle</option><option value="huggingface">HuggingFace</option><option value="github">GitHub</option><option value="zenodo">Zenodo</option><option value="papers_with_code">PapersWithCode</option><option value="figshare">Figshare</option><option value="roboflow">Roboflow</option><option value="ieee">IEEE</option><option value="nasa">NASA</option><option value="usgs">USGS</option><option value="generic">Generic</option></select><span class="fc" id="filter-count"></span></div>
+      <div class="filter-bar"><input id="filter-input" placeholder="🔍 Filter by name, source, license…" /><select id="filter-source"><option value="">All sources</option><option value="kaggle">Kaggle</option><option value="huggingface">HuggingFace</option><option value="github">GitHub</option><option value="zenodo">Zenodo</option><option value="papers_with_code">PapersWithCode</option><option value="figshare">Figshare</option><option value="roboflow">Roboflow</option><option value="ieee">IEEE</option><option value="nasa">NASA</option><option value="usgs">USGS</option><option value="generic">Generic</option></select><span class="fc" id="filter-count"></span><span style="cursor:pointer;color:var(--muted);font-size:12px;padding:2px 6px" onclick="clearFilter()" title="Clear filter">✕</span></div>
       <div class="body findings" id="findings"></div>
     </div>
   </section>
@@ -485,6 +485,11 @@ function applyFilter(){
   });
   const fc = $('filter-count');
   if(fc) fc.textContent = visible + ' shown';
+}
+function clearFilter(){
+  $('filter-input').value = '';
+  $('filter-source').value = '';
+  applyFilter();
 }
 $('filter-input').addEventListener('input', applyFilter);
 $('filter-source').addEventListener('change', applyFilter);
