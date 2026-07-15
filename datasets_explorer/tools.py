@@ -628,20 +628,40 @@ class ToolExecutor:
         # Try DDG first.
         ddg_results: list[dict] = []
         ddg_error: str = ""
-        try:
-            from ddgs import DDGS
-            self.rate_limiter.wait("ddg")
-            with DDGS() as ddgs:
-                ddg_results = [
-                    {"title": r["title"], "url": r["href"], "snippet": r["body"]}
-                    for r in ddgs.text(query, max_results=max_results)
-                ]
-        except Exception as e:
-            ddg_error = str(e)
-            logger.warning(f"[web_search] DDG error: {e}")
+        for ddg_attempt in range(2):
+            try:
+                from ddgs import DDGS
+                self.rate_limiter.wait("ddg")
+                with DDGS() as ddgs:
+                    ddg_results = [
+                        {"title": r["title"], "url": r["href"], "snippet": r["body"]}
+                        for r in ddgs.text(query, max_results=max_results)
+                    ]
+                if ddg_results:
+                    break
+                if ddg_attempt == 0 and BRAVE_API_KEY:
+                    continue
+            except Exception as e:
+                ddg_error = str(e)
+                logger.warning(f"[web_search] DDG error (attempt {ddg_attempt+1}): {e}")
+                if ddg_attempt == 0 and BRAVE_API_KEY:
+                    continue
+                break
 
-        # Fall back to Brave if DDG failed or returned nothing — only if a key is set.
-        if not ddg_results and BRAVE_API_KEY:
+        # Check for DDG CAPTCHA/block pages and low-quality results.
+        # If DDG returned very few results (likely blocked or rate-limited),
+        # fall back to Brave when available.
+        _ddg_blocked = len(ddg_results) < 3 or any(
+            kw in (ddg_error or "").lower() or any(
+                kw in (r.get("snippet", "") or "").lower() or kw in (r.get("title", "") or "").lower()
+                for r in ddg_results
+            )
+            for kw in ("captcha", "automated requests", "blocked", "rate limit", "try again later")
+        )
+
+        # Fall back to Brave if DDG failed, returned poor results, or looks
+        # like a block page — only if a key is set.
+        if (not ddg_results or _ddg_blocked) and BRAVE_API_KEY:
             try:
                 self.rate_limiter.wait("brave")
                 logger.info(f"[web_search] falling back to Brave for {query!r}")
