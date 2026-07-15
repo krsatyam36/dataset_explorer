@@ -249,3 +249,4 @@ def _render_dataset_detail(d: Dataset) -> None:
     console.print(Panel(details, title=f"Dataset #{d.id}"))
 # feat/cli-dashboard: Refine cli-dashboard CLI output
 # feat/cli-dashboard: Add cli-dashboard error messages
+# feat/cli-dashboard: Add cli-dashboard help examples
