@@ -300,3 +300,4 @@ class Storage:
     def mark_reviewed(self, dataset_id: int, reviewed: bool = True) -> None:
         self._conn.execute("UPDATE datasets SET reviewed=? WHERE id=?", (int(reviewed), dataset_id))
         self._conn.commit()
+# feat/storage-export-json: Add pretty-print option to JSON export
