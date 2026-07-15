@@ -133,6 +133,7 @@ def main(
     if sources:
         import datasets_explorer.config as cfg
         cfg.ALLOWED_SOURCES = sources
+        console.print(f"[dim]🔒 Source filter: [bold]{sources}[/bold][/dim]")
 
     storage = Storage(DB_PATH)
     agent = DatasetDiscoveryAgent(storage, model=model)
