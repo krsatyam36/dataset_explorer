@@ -2,6 +2,7 @@ import json
 import re
 import time
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from typing import Optional
 
@@ -607,23 +608,11 @@ class DatasetDiscoveryAgent:
                         seen_within_iter.add(key)
                         deduped_calls.append(call)
                     tool_calls = deduped_calls
-                    for call in tool_calls:
-                        tool_name = call["name"]
-                        tool_args = call["arguments"]
-                        self.logger.info(f"  Tool: {tool_name}({list(tool_args.keys())})")
-                        if on_activity is not None:
-                            try:
-                                on_activity({
-                                    "type": "tool_call",
-                                    "name": tool_name,
-                                    "args": tool_args,
-                                    "iteration": iteration,
-                                    "elapsed": time.time() - start_time,
-                                })
-                            except Exception:
-                                pass
 
-                        if tool_name == "mark_search_complete":
+                    # Phase 1: handle mark_search_complete (has side effects on loop state) first.
+                    _remaining = []
+                    for call in tool_calls:
+                        if call["name"] == "mark_search_complete":
                             stored_now = len(self.storage.get_datasets(query_id=query_id))
                             min_needed = DEPTH_MIN_DATASETS.get(depth, 25)
                             cooldown_until = getattr(tool_executor, "_mark_complete_cooldown_until", 0)
@@ -648,7 +637,6 @@ class DatasetDiscoveryAgent:
                                 self.logger.info(
                                     f"  Rejected mark_search_complete: have {stored_now}/{min_needed}"
                                 )
-                                # Set a 20-iteration cooldown so the model doesn't spam this tool.
                                 tool_executor._mark_complete_cooldown_until = iteration + 20
                                 rejection = {
                                     "rejected": True,
@@ -669,27 +657,61 @@ class DatasetDiscoveryAgent:
                                 })
                                 continue
                             search_done = True
+                            _remaining.append(call)
+                        else:
+                            _remaining.append(call)
 
-                        result = tool_executor.execute(tool_name, tool_args)
-                        if on_activity is not None and isinstance(result, dict):
-                            if result.get("rejected") or result.get("error") or (
-                                tool_name == "store_dataset" and result.get("success") is False
-                            ):
+                    # Phase 2: run all other tool calls in parallel.
+                    if _remaining:
+                        _now = time.time()
+                        for call in _remaining:
+                            tool_name = call["name"]
+                            tool_args = call["arguments"]
+                            self.logger.info(f"  Tool: {tool_name}({list(tool_args.keys())})")
+                            if on_activity is not None:
                                 try:
                                     on_activity({
-                                        "type": "tool_result",
+                                        "type": "tool_call",
                                         "name": tool_name,
-                                        "status": "rejected" if result.get("rejected") else "error",
-                                        "message": result.get("message") or result.get("error") or "",
+                                        "args": tool_args,
                                         "iteration": iteration,
-                                        "elapsed": time.time() - start_time,
+                                        "elapsed": _now - start_time,
                                     })
                                 except Exception:
                                     pass
-                        messages.append({
-                            "role": "tool",
-                            "content": json.dumps(result, default=str)[:4000],
-                        })
+
+                        max_workers = min(len(_remaining), 4)
+                        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+                            _futures = {
+                                pool.submit(tool_executor.execute, c["name"], c["arguments"]): c
+                                for c in _remaining
+                            }
+                            for future in as_completed(_futures):
+                                call = _futures[future]
+                                tool_name = call["name"]
+                                try:
+                                    result = future.result()
+                                except Exception as exc:
+                                    result = {"error": str(exc)}
+                                if on_activity is not None and isinstance(result, dict):
+                                    if result.get("rejected") or result.get("error") or (
+                                        tool_name == "store_dataset" and result.get("success") is False
+                                    ):
+                                        try:
+                                            on_activity({
+                                                "type": "tool_result",
+                                                "name": tool_name,
+                                                "status": "rejected" if result.get("rejected") else "error",
+                                                "message": result.get("message") or result.get("error") or "",
+                                                "iteration": iteration,
+                                                "elapsed": time.time() - start_time,
+                                            })
+                                        except Exception:
+                                            pass
+                                messages.append({
+                                    "role": "tool",
+                                    "content": json.dumps(result, default=str)[:4000],
+                                })
                 else:
                     consecutive_no_calls += 1
                     self.logger.info(f"  No tool calls (consecutive={consecutive_no_calls})")
