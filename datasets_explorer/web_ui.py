@@ -257,6 +257,10 @@ INDEX_HTML = r"""<!doctype html>
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}
 header{padding:14px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--panel)}
 header .brand{font-weight:700;letter-spacing:.5px;color:var(--accent)}
+.progress-wrap{width:100%;height:4px;background:var(--panel-2);border-radius:2px;overflow:hidden}
+.progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:2px;transition:width .6s ease}
+.progress-bar.paused{background:var(--warn)}
+.progress-bar.done{background:var(--good)}
 header .subject{font-family:var(--mono);color:var(--text);background:var(--panel-2);padding:5px 10px;border-radius:6px;border:1px solid var(--border)}
 header .status{margin-left:auto;display:flex;align-items:center;gap:14px}
 header .status .pill{padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--panel-2);font-family:var(--mono);font-size:12px;color:var(--muted)}
@@ -349,6 +353,7 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
     <span class="pill live" id="live">live</span>
     <span class="pill" id="elapsed">T+00m00s</span>
   </div>
+  <div class="progress-wrap" id="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
 </header>
 
 <section class="kpis">
@@ -410,7 +415,7 @@ const stream = $('stream'), findings = $('findings'), thinkingPane = $('thinking
 const sitesPane = $('sites');
 
 const state = {
-  iteration: 0, stored: 0, mainstream: 0, alternative: 0,
+  iteration: 0, maxIter: 0, stored: 0, mainstream: 0, alternative: 0,
   searches: 0, searchesRejected: 0, pdfs: 0, readmes: 0, fetches: 0,
   sites: new Map(), thinkingCount: 0, streamCount: 0, findingsCount: 0,
   startedAt: null,
@@ -506,6 +511,16 @@ function pushThinking(meta, text){
   while(thinkingPane.childElementCount > 200) thinkingPane.removeChild(thinkingPane.lastChild);
 }
 
+function updateProgress(iter, maxIter, status){
+  const bar = $('progress-bar');
+  if(!bar) return;
+  const pct = maxIter && maxIter>0 ? Math.min(100, (iter/maxIter)*100) : 0;
+  bar.style.width = pct + '%';
+  bar.className = 'progress-bar';
+  if(status==='done') bar.classList.add('done');
+  else if(status==='paused') bar.classList.add('paused');
+}
+
 function applyEvent(ev){
   if(ev.type === 'run_start'){
     state.startedAt = (Date.now()/1000) - (ev.elapsed||0);
@@ -521,7 +536,10 @@ function applyEvent(ev){
       sel.value = ev.model;
     }
     if(ev.depth) $('depth').textContent = `depth: ${ev.depth}`;
-    if(ev.max_iters) $('kpi-iter-cap').textContent = `/ ${ev.max_iters}`;
+    if(ev.max_iters){
+      state.maxIter = ev.max_iters;
+      $('kpi-iter-cap').textContent = `/ ${ev.max_iters}`;
+    }
     if(ev.min_needed) $('kpi-needed').textContent = `need ${ev.min_needed}`;
     return;
   }
@@ -546,6 +564,7 @@ function applyEvent(ev){
   if(ev.type === 'iter_start'){
     state.iteration = ev.iteration || 0;
     $('kpi-iter').textContent = state.iteration;
+    updateProgress(state.iteration, state.maxIter, 'running');
     return;
   }
   if(ev.type === 'thinking'){
@@ -611,6 +630,7 @@ function applyEvent(ev){
   if(ev.type === 'run_complete'){
     $('live').textContent = 'done';
     $('live').classList.remove('live');
+    updateProgress(state.maxIter, state.maxIter, 'done');
     pushRow('store', '✅', `Run complete · ${ev.status||''} · ${ev.stored||0} stored`, ev);
     return;
   }
