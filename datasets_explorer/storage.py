@@ -16,6 +16,29 @@ class Storage:
         self._conn.row_factory = sqlite3.Row
         self._init_schema()
 
+    def import_json(self, path: Path) -> int:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        count = 0
+        for item in data:
+            try:
+                url = item.get("url", "")
+                if not url:
+                    continue
+                name = item.get("name", "")
+                score = float(item.get("relevance_score", 0.0) or 0.0)
+                reasoning = item.get("relevance_reasoning", None)
+                self._conn.execute(
+                    """INSERT OR IGNORE INTO datasets (name, url, relevance_score, relevance_reasoning, source)
+                       VALUES (?, ?, ?, ?, ?)""",
+                    (name, url, score, reasoning, item.get("source", "generic")),
+                )
+                count += 1
+            except Exception:
+                pass
+        self._conn.commit()
+        logger.info(f"Imported {count} datasets from {path}")
+        return count
+
     def _init_schema(self) -> None:
         self._conn.executescript("""
             CREATE TABLE IF NOT EXISTS search_queries (
