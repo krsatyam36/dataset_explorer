@@ -16,6 +16,10 @@ class Storage:
     def backup(self, suffix: str = "") -> Optional[Path]:
         backup_dir = self.db_path.parent / "backups"
         backup_dir.mkdir(parents=True, exist_ok=True)
+        # Clean old backups (keep last 10)
+        old = sorted(backup_dir.glob("results_*.db"))
+        for f in old[:-10]:
+            f.unlink(missing_ok=True)
         stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_path = backup_dir / f"results_{stamp}{suffix}.db"
         try:
