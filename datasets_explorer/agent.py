@@ -799,3 +799,4 @@ class DatasetDiscoveryAgent:
             except Exception:
                 pass
         return query
+# graceful-shutdown: prevent data loss on interrupt
