@@ -449,9 +449,13 @@ function renderSites(){
 
 function applyStreamFilter(){
   _streamFilter = ($('stream-filter').value||'').toLowerCase();
+  let hidden = 0;
   stream.querySelectorAll('.row').forEach(r => {
-    r.style.display = (!_streamFilter || r.textContent.toLowerCase().includes(_streamFilter)) ? '' : 'none';
+    const match = !_streamFilter || r.textContent.toLowerCase().includes(_streamFilter);
+    r.style.display = match ? '' : 'none';
+    if(!match) hidden++;
   });
+  $('stream-count').textContent = state.streamCount - hidden + '/' + state.streamCount;
 }
 
 function pushRow(kind, ic, html, meta){
