@@ -407,13 +407,14 @@ const KIND_OF = {
 
 const $ = (id) => document.getElementById(id);
 const stream = $('stream'), findings = $('findings'), thinkingPane = $('thinking');
+let autoScrollBtn = null;
 const sitesPane = $('sites');
 
 const state = {
-  iteration: 0, stored: 0, mainstream: 0, alternative: 0,
+  iteration: 0, maxIter: 0, stored: 0, mainstream: 0, alternative: 0,
   searches: 0, searchesRejected: 0, pdfs: 0, readmes: 0, fetches: 0,
   sites: new Map(), thinkingCount: 0, streamCount: 0, findingsCount: 0,
-  startedAt: null,
+  startedAt: null, autoScroll: true,
 };
 
 function fmtElapsed(secs){
@@ -446,6 +447,27 @@ function renderSites(){
   $('sites-count').textContent = state.sites.size;
 }
 
+function createAutoScrollBtn(){
+  autoScrollBtn = document.createElement('button');
+  autoScrollBtn.textContent = '⬇ Auto-scroll';
+  autoScrollBtn.style.cssText = 'position:fixed;bottom:40px;right:24px;background:var(--accent);color:var(--bg);border:none;padding:6px 14px;border-radius:8px;font-family:var(--mono);font-size:11px;cursor:pointer;z-index:100;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none';
+  autoScrollBtn.addEventListener('click', () => {
+    state.autoScroll = true;
+    autoScrollBtn.style.display = 'none';
+    stream.scrollTop = stream.scrollHeight;
+  });
+  document.body.appendChild(autoScrollBtn);
+}
+stream.addEventListener('scroll', () => {
+  if(!state.autoScroll) return;
+  const distFromBottom = stream.scrollHeight - stream.scrollTop - stream.clientHeight;
+  if(distFromBottom > 100){
+    state.autoScroll = false;
+    if(autoScrollBtn) autoScrollBtn.style.display = 'block';
+  }
+});
+createAutoScrollBtn();
+
 function pushRow(kind, ic, html, meta){
   const t = meta && meta.elapsed!=null ? fmtElapsed(meta.elapsed) : '';
   const it = meta && meta.iteration!=null ? `iter ${String(meta.iteration).padStart(3)}` : '';
@@ -456,7 +478,7 @@ function pushRow(kind, ic, html, meta){
   state.streamCount += 1;
   $('stream-count').textContent = state.streamCount;
   while(stream.childElementCount > 800) stream.removeChild(stream.firstChild);
-  stream.scrollTop = stream.scrollHeight;
+  if(state.autoScroll) stream.scrollTop = stream.scrollHeight;
 }
 
 function setNow(ic, txt, meta){
