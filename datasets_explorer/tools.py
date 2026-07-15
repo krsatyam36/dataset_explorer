@@ -1400,3 +1400,4 @@ class ToolExecutor:
         return {"done": True, "summary": inp.get("summary", ""), "total": inp.get("total_found", 0)}
 # feat/search-reproducibility: Add search-reproducibility helper function
 # feat/search-reproducibility: Wire search-reproducibility into search pipeline
+# feat/search-reproducibility: Add tests for search-reproducibility feature
