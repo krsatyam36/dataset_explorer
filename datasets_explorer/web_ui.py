@@ -699,13 +699,24 @@ $('model-select').addEventListener('change', (e) => {
 loadModels();
 setInterval(loadModels, 30000);  // refresh in case the user pulls a new model
 
-$('export-btn').addEventListener('click', () => {
-  const a = document.createElement('a');
-  a.href = '/export/csv';
-  a.download = 'datasets_export.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+$('export-btn').addEventListener('click', async () => {
+  const btn = $('export-btn');
+  const orig = btn.textContent;
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  try {
+    const r = await fetch('/export/csv');
+    const blob = await r.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'datasets_export.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    pushRow('store', '⬇', `Exported ${(blob.size/1024).toFixed(0)}KB CSV`, {elapsed:0});
+  } catch(e){ console.warn('export error', e); }
+  finally { btn.textContent = '✅'; setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000); }
 });
 
 function connect(){
