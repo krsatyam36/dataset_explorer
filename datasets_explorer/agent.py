@@ -18,6 +18,8 @@ from .config import (
 
 # Minimum datasets required before mark_search_complete is honored, by depth.
 DEPTH_MIN_DATASETS = {1: 8, 2: 25, 3: 50}
+# Auto keyword expansion: after each web_search, inject expanded synonym queries.
+KEYWORD_EXPANSION = True
 # How often to inject a progress reminder into the conversation.
 PROGRESS_REMINDER_EVERY = 15
 
@@ -690,6 +692,27 @@ class DatasetDiscoveryAgent:
                             "role": "tool",
                             "content": json.dumps(result, default=str)[:4000],
                         })
+                        if tool_name == "web_search" and KEYWORD_EXPANSION and isinstance(result, list) and len(result) >= 3:
+                            query = (call.get("arguments") or {}).get("query", "")
+                            _synonyms = {
+                                "aircraft": "airplane|jet|fighter|bomber|UAV|drone",
+                                "ship": "vessel|boat|maritime|naval|container",
+                                "vehicle": "car|truck|automobile|ground",
+                                "satellite": "satellite imagery|remote sensing|earth observation",
+                                "aerial": "overhead|top-down|nadir|ortho",
+                            }
+                            for src, repl in _synonyms.items():
+                                if src in query.lower():
+                                    expanded = query.lower().replace(src, repl)
+                                    if expanded != query.lower():
+                                        messages.append({
+                                            "role": "user",
+                                            "content": (
+                                                f"[keyword-expansion tip] Try this synonym variant: "
+                                                f"web_search(query=\"{expanded}\")"
+                                            ),
+                                        })
+                                    break
                 else:
                     consecutive_no_calls += 1
                     self.logger.info(f"  No tool calls (consecutive={consecutive_no_calls})")
