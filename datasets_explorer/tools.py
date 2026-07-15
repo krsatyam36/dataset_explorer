@@ -1401,3 +1401,4 @@ class ToolExecutor:
         )
         return {"done": True, "summary": inp.get("summary", ""), "total": inp.get("total_found", 0)}
 # feat/search-brave-enhanced: Improve Brave search result parsing (step 1)
+# feat/search-brave-enhanced: Improve Brave search result parsing (step 2)
