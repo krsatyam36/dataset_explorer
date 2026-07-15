@@ -96,6 +96,11 @@ DEPTH_DESCRIPTIONS = {
     show_default=True,
     help="Port for the web dashboard.",
 )
+@click.option(
+    "--interactive/--no-interactive",
+    default=False,
+    help="Pause and prompt for user input between iterations.",
+)
 def main(
     subject: str,
     fmt: str,
@@ -107,6 +112,7 @@ def main(
     min_relevance: float,
     web: bool,
     web_port: int,
+    interactive: bool,
 ):
     """Find datasets matching SUBJECT by autonomously scanning the internet.
 
@@ -268,6 +274,9 @@ def main(
             color = "red" if status == "rejected" else "yellow"
             icon = "⛔" if status == "rejected" else "⚠️"
             console.print(f"{prefix} [{color}]{icon} {name} {status}[/{color}]  [dim]{short}[/dim]")
+
+    if interactive:
+        console.print("[yellow]Interactive mode enabled. Press Enter after each iteration to continue.[/yellow]")
 
     try:
         result = agent.run(
