@@ -314,6 +314,9 @@ main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
 .findings .url{color:var(--accent);word-break:break-all}
 .findings .url a{color:inherit;text-decoration:none}
 .findings .url a:hover{text-decoration:underline}
+.copy-btn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;background:var(--panel-2);border:1px solid var(--border);cursor:pointer;font-size:11px;color:var(--muted);vertical-align:middle;flex-shrink:0;transition:all .15s}
+.copy-btn:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.copy-btn.done{background:var(--good);color:var(--bg);border-color:var(--good)}
 .findings .meta{color:var(--muted);font-size:11px;margin-top:3px}
 .findings .meta .tag{display:inline-block;background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;margin-right:5px}
 
@@ -485,14 +488,57 @@ function pushFinding(d){
     <div class="score ${cls}">${score}</div>
     <div>
       <div class="name">${escapeHtml(d.name||'')}</div>
-      <div class="url"><a href="${d.url}" target="_blank">${escapeHtml(d.url||'')}</a></div>
+      <div class="url"><a href="${d.url}" target="_blank">${escapeHtml(d.url||'')}</a> <span class="copy-btn" data-copy="${escapeHtml(d.url||'')}">📋</span></div>
       ${dl}${meta}
     </div>`;
   findings.insertBefore(row, findings.firstChild);
   state.findingsCount += 1;
   $('findings-count').textContent = state.findingsCount;
 }
-function escapeHtml(s){return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.copy-btn');
+  if(btn){
+    e.stopPropagation();
+    const text = btn.dataset.copy || btn.textContent;
+    copyText(text, btn);
+  }
+});
+function showToast(msg, color){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;bottom:80px;right:24px;background:${color||'var(--accent)'};color:var(--bg);padding:8px 16px;border-radius:8px;font-family:var(--mono);font-size:12px;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .3s`;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2000);
+}
+function copyText(text, btn){
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓'; btn.classList.add('done');
+    showToast('Copied!', 'var(--good)');
+    setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('done'); }, 1500);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓'; btn.classList.add('done');
+    showToast('Copied!', 'var(--good)');
+    setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('done'); }, 1500);
+  });
+}
+function copyText(text, btn){
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓';
+    btn.classList.add('done');
+    setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('done'); }, 1500);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓'; btn.classList.add('done');
+    setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('done'); }, 1500);
+  });
+}
 
 function pushThinking(meta, text){
   const det = document.createElement('details');
