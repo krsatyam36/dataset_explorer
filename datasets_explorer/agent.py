@@ -791,3 +791,4 @@ class DatasetDiscoveryAgent:
                 pass
         return query
 # feat/agent-perspective: Refine agent-perspective implementation
+# feat/agent-perspective: Add agent-perspective config option
