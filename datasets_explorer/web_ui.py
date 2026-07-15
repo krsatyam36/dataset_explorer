@@ -671,6 +671,9 @@ function toggleTheme(){
   btn.textContent = isLight ? '☀️' : '🌙';
   btn.classList.add('spin');
   setTimeout(() => btn.classList.remove('spin'), 300);
+  if(typeof state !== 'undefined'){
+    pushRow('store', '🎨', `Theme switched to <b>${isLight?'light':'dark'}</b> mode`, {elapsed:0});
+  }
 }
 (function initTheme(){
   const saved = localStorage.getItem('theme');
