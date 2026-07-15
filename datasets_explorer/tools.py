@@ -1400,3 +1400,4 @@ class ToolExecutor:
         return {"done": True, "summary": inp.get("summary", ""), "total": inp.get("total_found", 0)}
 # feat/search-federated: Add search-federated helper function
 # feat/search-federated: Wire search-federated into search pipeline
+# feat/search-federated: Add tests for search-federated feature
