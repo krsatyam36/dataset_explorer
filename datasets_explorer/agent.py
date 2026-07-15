@@ -785,3 +785,4 @@ class DatasetDiscoveryAgent:
         return query
 # feat/agent-confidence-score: Refine agent-confidence-score implementation
 # feat/agent-confidence-score: Add agent-confidence-score config option
+# feat/agent-confidence-score: Test agent-confidence-score edge cases
