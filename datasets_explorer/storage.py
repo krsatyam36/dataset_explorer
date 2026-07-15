@@ -16,6 +16,18 @@ class Storage:
         self._conn.row_factory = sqlite3.Row
         self._init_schema()
 
+    def add_tag(self, dataset_id: int, tag: str) -> None:
+        self._conn.execute("INSERT OR IGNORE INTO tags (dataset_id, tag) VALUES (?, ?)", (dataset_id, tag.strip().lower()))
+        self._conn.commit()
+
+    def remove_tag(self, dataset_id: int, tag: str) -> None:
+        self._conn.execute("DELETE FROM tags WHERE dataset_id=? AND tag=?", (dataset_id, tag.strip().lower()))
+        self._conn.commit()
+
+    def get_tags(self, dataset_id: int) -> list[str]:
+        rows = self._conn.execute("SELECT tag FROM tags WHERE dataset_id=?", (dataset_id,)).fetchall()
+        return [r["tag"] for r in rows]
+
     def _init_schema(self) -> None:
         self._conn.executescript("""
             CREATE TABLE IF NOT EXISTS search_queries (
@@ -31,6 +43,13 @@ class Storage:
                 session_log TEXT DEFAULT ''
             );
 
+            CREATE TABLE IF NOT EXISTS tags (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                dataset_id INTEGER NOT NULL,
+                tag TEXT NOT NULL,
+                UNIQUE(dataset_id, tag),
+                FOREIGN KEY(dataset_id) REFERENCES datasets(id)
+            );
             CREATE TABLE IF NOT EXISTS datasets (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
