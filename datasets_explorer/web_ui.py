@@ -332,7 +332,10 @@ main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
 .timeline .tl-item::before{content:'';position:absolute;left:-7px;top:7px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--bg)}
 .timeline .tl-item .tl-time{color:var(--muted);font-size:10px;white-space:nowrap;min-width:80px}
 .timeline .tl-item .tl-name{color:var(--text);word-break:break-all}
-.timeline .tl-item .tl-score{color:var(--good);font-weight:700;min-width:30px;text-align:right}
+.timeline .tl-item .tl-score{font-weight:700;min-width:30px;text-align:right}
+.timeline .tl-item .tl-score.high{color:var(--good)}
+.timeline .tl-item .tl-score.mid{color:var(--warn)}
+.timeline .tl-item .tl-score.low{color:var(--bad)}
 .sites{font-family:var(--mono);font-size:12px;padding:10px 14px;display:flex;flex-wrap:wrap;gap:6px}
 .sites .chip{background:var(--panel-2);border:1px solid var(--border);padding:3px 8px;border-radius:5px;color:var(--text);display:flex;align-items:center;gap:5px}
 .sites .chip .n{color:var(--muted);font-size:11px}
@@ -490,8 +493,9 @@ function pushTimeline(d){
   const timeStr = now.toLocaleTimeString();
   const score = (d.relevance_score ?? 0).toFixed(2);
   const item = document.createElement('div');
+  const scoreCls = score >= 0.8 ? 'high' : (score >= 0.5 ? 'mid' : 'low');
   item.className = 'tl-item';
-  item.innerHTML = `<span class="tl-score">${score}</span><span class="tl-time">${timeStr}</span><span class="tl-name">${escapeHtml(d.name||'')}</span>`;
+  item.innerHTML = `<span class="tl-score ${scoreCls}">${score}</span><span class="tl-time">${timeStr}</span><span class="tl-name">${escapeHtml(d.name||'')}</span>`;
   tl.insertBefore(item, tl.firstChild);
   const c = $('tl-count');
   if(c) c.textContent = tl.childElementCount;
