@@ -245,7 +245,10 @@ INDEX_HTML = r"""<!doctype html>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <meta name="theme-color" content="#0b0e14" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%237aa2f7'/><text x='16' y='22' font-size='18' fill='%230b0e14' text-anchor='middle' font-family='sans-serif' font-weight='bold'>DS</text></svg>" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='24' fill='%237aa2f7'/><text x='96' y='128' font-size='96' fill='%230b0e14' text-anchor='middle' font-family='sans-serif' font-weight='bold'>DS</text></svg>" />
 <title>dataset_search · live</title>
 <style>
 :root{
