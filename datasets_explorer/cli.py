@@ -157,6 +157,22 @@ def queries():
 
 
 @cli.command()
+@click.argument("query_file", type=click.Path(exists=True))
+@click.option("--hours", default=1.0, help="Hours per query", show_default=True)
+def batch(query_file, hours):
+    """Run multiple searches from a file (one query per line)."""
+    with open(query_file) as f:
+        queries = [line.strip() for line in f if line.strip()]
+    console.print(f"[green]Queued {len(queries)} queries[/green]")
+    from .agent import DatasetDiscoveryAgent
+    from .storage import Storage
+    for i, q in enumerate(queries, 1):
+        console.print(f"\n[bold]=== [{i}/{len(queries)}] {q} ===[/bold]")
+        storage = Storage(DB_PATH)
+        agent = DatasetDiscoveryAgent(storage, model=OLLAMA_MODEL)
+        agent.run(subject=q, formats=[], time_range="", depth=2, max_hours=hours)
+
+@cli.command()
 @click.argument("dataset_id", type=int)
 @click.argument("notes")
 def annotate(dataset_id: int, notes: str):
