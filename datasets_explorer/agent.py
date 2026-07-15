@@ -711,6 +711,14 @@ class DatasetDiscoveryAgent:
 
                 # Every N iterations, inject a progress reminder so the model
                 # doesn't drift, get stuck on one source, or wind down too early.
+                # Adaptive depth check: if discovery rate is high, extend max_iters.
+                if iteration > 0 and iteration % 30 == 0 and not search_done:
+                    recent_stores = len(self.storage.get_datasets(query_id=query_id)) - getattr(self, "_prev_store_count", 0)
+                    setattr(self, "_prev_store_count", len(self.storage.get_datasets(query_id=query_id)))
+                    if recent_stores >= 3 and iteration >= max_iters * 0.8:
+                        max_iters = int(max_iters * 1.5)
+                        self.logger.info(f"[adaptive] Extending max_iters to {max_iters} (rate={recent_stores}/30)")
+
                 if iteration > 0 and iteration % PROGRESS_REMINDER_EVERY == 0 and not search_done:
                     stored_now = len(self.storage.get_datasets(query_id=query_id))
                     min_needed = DEPTH_MIN_DATASETS.get(depth, 25)
