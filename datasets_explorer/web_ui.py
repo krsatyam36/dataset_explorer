@@ -473,6 +473,23 @@ stream.addEventListener('scroll', () => {
   }
 });
 createAutoScrollBtn();
+document.addEventListener('keydown', e => {
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.tagName==='TEXTAREA') return;
+  if(e.key===' '){ e.preventDefault(); toggleAutoScroll(); }
+});
+function toggleAutoScroll(){
+  state.autoScroll = !state.autoScroll;
+  if(state.autoScroll){
+    stream.scrollTop = stream.scrollHeight;
+    if(autoScrollBtn) autoScrollBtn.style.display = 'none';
+    const s = $('scroll-status');
+    if(s) s.style.display = 'none';
+  } else {
+    if(autoScrollBtn) autoScrollBtn.style.display = 'block';
+    const s = $('scroll-status');
+    if(s) s.style.display = 'inline';
+  }
+}
 
 function pushRow(kind, ic, html, meta){
   const t = meta && meta.elapsed!=null ? fmtElapsed(meta.elapsed) : '';
