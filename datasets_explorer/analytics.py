@@ -42,3 +42,4 @@ def get_collection_rate(storage_datasets) -> Dict:
         "date_range": f"{days[0]} -> {days[-1]}" if len(days) > 1 else days[0],
     }
 # feat/analytics-time-trend: Refine analytics-time-trend output format
+# feat/analytics-time-trend: Add analytics-time-trend edge case handling
