@@ -257,7 +257,8 @@ INDEX_HTML = r"""<!doctype html>
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}
 header{padding:14px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--panel)}
 header .brand{font-weight:700;letter-spacing:.5px;color:var(--accent)}
-.progress-wrap{width:100%;height:4px;background:var(--panel-2);border-radius:2px;overflow:hidden}
+.progress-wrap{width:100%;height:4px;background:var(--panel-2);border-radius:2px;overflow:hidden;position:relative}
+.progress-wrap .pct{position:absolute;right:6px;top:-4px;font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1}
 .progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:2px;transition:width .6s ease}
 .progress-bar.paused{background:var(--warn)}
 .progress-bar.done{background:var(--good)}
@@ -355,7 +356,7 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
     <span class="pill live" id="live">live</span>
     <span class="pill" id="elapsed">T+00m00s</span>
   </div>
-  <div class="progress-wrap" id="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+  <div class="progress-wrap" id="progress-wrap"><div class="progress-bar" id="progress-bar"></div><span class="pct" id="progress-pct">0%</span></div>
 </header>
 
 <section class="kpis">
@@ -516,12 +517,14 @@ function pushThinking(meta, text){
 function updateProgress(iter, maxIter, status){
   const bar = $('progress-bar');
   if(!bar) return;
-  const pct = maxIter && maxIter>0 ? Math.min(100, (iter/maxIter)*100) : 0;
+  const pct = maxIter && maxIter>0 ? Math.min(100, Math.round((iter/maxIter)*100)) : 0;
   bar.style.width = pct + '%';
   bar.className = 'progress-bar';
   if(status==='done'){ bar.classList.add('done'); }
   else if(status==='paused'){ bar.classList.add('paused'); }
   else { bar.classList.add('active'); }
+  const pctEl = $('progress-pct');
+  if(pctEl) pctEl.textContent = pct+'%';
 }
 
 function applyEvent(ev){
