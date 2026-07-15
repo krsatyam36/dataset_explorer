@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=64.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "datasets_explorer"
+version = "0.2.0"
+description = "Autonomous OSINT-style CLI agent that scours the public internet for ML datasets"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = [
+    "ollama>=0.4.0",
+    "ddgs>=0.1.0",
+    "requests>=2.33.0",
+    "httpx>=0.28.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.2.0",
+    "rich>=14.0.0",
+    "click>=8.1.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+]
+optional-dependencies = {dev = ["pytest>=7.0", "pytest-mock>=3.0"]}
+
+[project.scripts]
+datasets_explorer = "datasets_explorer.cli:cli"
+dataset_search = "datasets_explorer.search_cli:main"
+
+[tool.setuptools.packages.find]
+include = ["datasets_explorer*"]
