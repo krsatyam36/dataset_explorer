@@ -445,7 +445,7 @@ function renderSites(){
   $('kpi-sites').textContent = state.sites.size;
   const sorted = [...state.sites.entries()].sort((a,b)=>b[1]-a[1]).slice(0,80);
   sitesPane.innerHTML = sorted.map(([h,n]) =>
-    `<span class="chip">${h} <span class="n">${n}</span></span>`).join('');
+    `<span class="chip">${h} <span class="n">${n}</span> <span class="copy-btn" data-copy="${h}" style="width:16px;height:16px;font-size:9px;display:inline-flex;margin-left:2px">📋</span></span>`).join('');
   $('sites-count').textContent = state.sites.size;
 }
 
@@ -488,7 +488,8 @@ function pushFinding(d){
     <div class="score ${cls}">${score}</div>
     <div>
       <div class="name">${escapeHtml(d.name||'')}</div>
-      <div class="url"><a href="${d.url}" target="_blank">${escapeHtml(d.url||'')}</a> <span class="copy-btn" data-copy="${escapeHtml(d.url||'')}">📋</span></div>
+      <div class="url"><a href="${d.url}" target="_blank">${escapeHtml(d.url||'')}</a> <span class="copy-btn" data-copy="${escapeHtml(d.url||'')}">📋</span>
+      ${d.download_url && d.download_url!==d.url ? `<span class="copy-btn" data-copy="${escapeHtml(d.download_url)}" title="Copy download URL">⬇</span>` : ''}</div>
       ${dl}${meta}
     </div>`;
   findings.insertBefore(row, findings.firstChild);
