@@ -495,7 +495,13 @@ function pushTimeline(d){
   const item = document.createElement('div');
   const scoreCls = score >= 0.8 ? 'high' : (score >= 0.5 ? 'mid' : 'low');
   item.className = 'tl-item';
+  item.style.cursor = 'pointer';
+  item.title = 'Scroll to finding';
   item.innerHTML = `<span class="tl-score ${scoreCls}">${score}</span><span class="tl-time">${timeStr}</span><span class="tl-name">${escapeHtml(d.name||'')}</span>`;
+  item.addEventListener('click', () => {
+    const target = Array.from(findings.querySelectorAll('.row')).find(r => r.textContent.includes(d.name));
+    if(target){ target.scrollIntoView({behavior:'smooth',block:'center'}); target.style.outline='2px solid var(--accent)'; setTimeout(()=>target.style.outline='',2000); }
+  });
   tl.insertBefore(item, tl.firstChild);
   const c = $('tl-count');
   if(c) c.textContent = tl.childElementCount;
