@@ -332,6 +332,28 @@ main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
 footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid var(--border);font-family:var(--mono);text-align:right}
 
 @media (max-width: 1100px){main,.lower{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}}
+@media (max-width: 700px){
+  header{flex-direction:column;gap:8px;padding:10px 12px;align-items:stretch}
+  header .status{flex-wrap:wrap;justify-content:flex-start}
+  .kpis{grid-template-columns:repeat(2,1fr);padding:10px 12px;gap:6px}
+  .kpi{padding:8px 10px}
+  .kpi .val{font-size:16px}
+  .kpi .sub{font-size:10px}
+  main,.lower{padding:0 12px 12px;gap:10px}
+  .lower .panel,.panel{min-height:200px}
+  .stream .row{padding:3px 10px;font-size:11px;flex-wrap:wrap}
+  .findings .row{grid-template-columns:1fr;padding:6px 10px}
+  .findings .score{display:none}
+  footer{font-size:10px;padding:6px 12px}
+  .now .what{font-size:13px}
+}
+@media (max-width: 450px){
+  .kpis{grid-template-columns:1fr 1fr;gap:4px}
+  header .brand{font-size:13px}
+  .kpi .val{font-size:14px}
+  .kpi .lbl{font-size:10px}
+  #model-select{max-width:100px;font-size:10px}
+}
 </style>
 </head>
 <body>
