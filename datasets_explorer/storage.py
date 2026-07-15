@@ -16,6 +16,17 @@ class Storage:
         self._conn.row_factory = sqlite3.Row
         self._init_schema()
 
+    def export_json(self, path: Path, query_id: Optional[int] = None) -> Path:
+        from .models import Dataset
+        rows = self._conn.execute(
+            "SELECT * FROM datasets" + (" WHERE query_id=?" if query_id else ""),
+            (query_id,) if query_id else (),
+        ).fetchall()
+        data = [dict(r) for r in rows]
+        path.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
+        logger.info(f"Exported {len(data)} datasets to {path}")
+        return path
+
     def _init_schema(self) -> None:
         self._conn.executescript("""
             CREATE TABLE IF NOT EXISTS search_queries (
