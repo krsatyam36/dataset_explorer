@@ -398,6 +398,7 @@ class ToolExecutor:
             allowed = {s.strip().lower() for s in ALLOWED_SOURCES.split(",") if s.strip()}
             required = _source_map.get(tool_name, "")
             if required and required not in allowed:
+                logger.info(f"[source-filter] Blocked {tool_name}: {required} not in allowed={allowed}")
                 return {"rejected": True, "error": f"Source '{required}' is not in allowed sources: {ALLOWED_SOURCES}"}
         fn = dispatch.get(tool_name)
         if fn is None:
