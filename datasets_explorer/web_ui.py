@@ -512,6 +512,16 @@ function pushThinking(meta, text){
   while(thinkingPane.childElementCount > 200) thinkingPane.removeChild(thinkingPane.lastChild);
 }
 
+function setModelDot(status){
+  const dot = $('model-dot');
+  if(!dot) return;
+  dot.className = 'model-dot' + (status ? ' '+status : '');
+}
+function setModelInfo(text){
+  const el = $('model-info');
+  if(el) el.textContent = text || '';
+}
+
 function applyEvent(ev){
   if(ev.type === 'run_start'){
     state.startedAt = (Date.now()/1000) - (ev.elapsed||0);
@@ -526,6 +536,8 @@ function applyEvent(ev){
       }
       sel.value = ev.model;
     }
+    setModelDot('active');
+    if(ev.model_info) setModelInfo(ev.model_info);
     if(ev.depth) $('depth').textContent = `depth: ${ev.depth}`;
     if(ev.max_iters) $('kpi-iter-cap').textContent = `/ ${ev.max_iters}`;
     if(ev.min_needed) $('kpi-needed').textContent = `need ${ev.min_needed}`;
@@ -534,6 +546,11 @@ function applyEvent(ev){
   if(ev.type === 'model_switch_requested'){
     $('model-switching').style.display = 'inline-block';
     pushRow('thinking', '↻', `model switch requested → ${escapeHtml(ev.model||'')} (will take effect at next iteration)`, ev);
+    return;
+  }
+  if(ev.type === 'model_status'){
+    setModelDot(ev.status || 'active');
+    if(ev.info) setModelInfo(ev.info);
     return;
   }
   if(ev.type === 'model_switched'){
