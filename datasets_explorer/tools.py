@@ -575,14 +575,19 @@ class ToolExecutor:
                 ),
                 "rejected": True,
             }
-        # DDG (and Brave) do NOT honor `site:X OR site:Y OR site:Z` syntax — this
-        # silently returns junk. Force the agent to issue them as separate queries.
-        if re.search(r"\bsite:\S+\s+OR\s+site:", query, re.IGNORECASE) or \
-           re.search(r"\bsite:\([^)]*\|", query):
-            logger.info(f"[web_search] REJECTED malformed OR-site query: {query!r}")
+        # DDG (and Brave) do NOT honor compound site: combinator syntax — these
+        # silently return junk. Force the agent to issue them as separate queries.
+        _has_or_site = re.search(r"\bsite:\S+\s+OR\s+site:", query, re.IGNORECASE)
+        _has_pipe_site = re.search(r"\bsite:\S+\s+\|\s+site:", query, re.IGNORECASE)
+        _has_parenthesized_site = re.search(r"\bsite:\([^)]*\|", query)
+        # Two positive site: operators (not negated with -site:)
+        _positive_sites = len(re.findall(r"(?:^|\s)(site:\S+)", query))
+        if _has_or_site or _has_pipe_site or _has_parenthesized_site or _positive_sites > 1:
+            logger.info(f"[web_search] REJECTED compound-site query: {query!r}")
             return {
                 "error": (
-                    "REJECTED: DuckDuckGo does not honor 'site:X OR site:Y' across site filters. "
+                    "REJECTED: DuckDuckGo does not honor compound site: combinators "
+                    "(OR, |, or multiple site: filters in one query). "
                     "Issue them as SEPARATE queries — one site: per call."
                 ),
                 "rejected": True,
