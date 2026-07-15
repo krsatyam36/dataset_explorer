@@ -797,3 +797,4 @@ class DatasetDiscoveryAgent:
             except Exception:
                 pass
         return query
+# feat/agent-self-reflection: Refine agent-self-reflection implementation
