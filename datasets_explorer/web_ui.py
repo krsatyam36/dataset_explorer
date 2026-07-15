@@ -334,6 +334,8 @@ main{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;padding:0 22px 22px}
 .sites .chip .n{color:var(--muted);font-size:11px}
 
 footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid var(--border);font-family:var(--mono);text-align:right}
+.model-detail-popup{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;display:flex;align-items:center;justify-content:center}
+.model-detail-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px;max-width:360px;font-family:var(--sans);color:var(--text)}
 
 @media (max-width: 1100px){main,.lower{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}}
 </style>
@@ -517,6 +519,18 @@ function setModelDot(status){
   if(!dot) return;
   dot.className = 'model-dot' + (status ? ' '+status : '');
 }
+function openModelDetail(name){
+  if(!name) return;
+  const el = document.createElement('div');
+  el.className = 'model-detail-popup';
+  el.innerHTML = `<div class="model-detail-card"><b>${escapeHtml(name)}</b><br><span style="color:var(--muted);font-size:11px">active · tool-calling model</span><br><br><button onclick="this.parentElement.parentElement.remove()" style="background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:4px 12px;border-radius:4px;cursor:pointer">close</button></div>`;
+  el.addEventListener('click', e => { if(e.target===el) el.remove(); });
+  document.body.appendChild(el);
+}
+document.addEventListener('dblclick', e => {
+  const sel = $('model-select');
+  if(e.target===sel || e.target.closest('#model-pill')) openModelDetail(sel.value);
+});
 function setModelInfo(text){
   const el = $('model-info');
   if(el) el.textContent = text || '';
