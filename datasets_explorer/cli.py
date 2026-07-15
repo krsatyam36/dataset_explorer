@@ -29,6 +29,23 @@ def cli():
 
 
 @cli.command()
+@click.option("--port", default=7860, help="Port for the dashboard", show_default=True)
+def dashboard(port):
+    """Launch the web dashboard without starting a search."""
+    from . import web_ui
+    p = web_ui.start(port=port)
+    if p:
+        console.print(f"[green]Dashboard running at http://127.0.0.1:{p}")
+        console.print("[dim]Press Ctrl+C to stop[/dim]")
+        import time
+        try:
+            while True: time.sleep(1)
+        except KeyboardInterrupt:
+            web_ui.stop()
+    else:
+        console.print("[red]Failed to start dashboard[/red]")
+
+@cli.command()
 @click.argument("query")
 @click.option("--hours", default=2.0, show_default=True, help="Max search duration in hours")
 @click.option(
