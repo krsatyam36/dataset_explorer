@@ -347,6 +347,7 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
     </span>
     <span class="pill" id="depth">depth: —</span>
     <span class="pill live" id="live">live</span>
+    <span class="pill" id="sound-btn" style="cursor:pointer" onclick="toggleSound()" title="Toggle notification sounds">🔔</span>
     <span class="pill" id="elapsed">T+00m00s</span>
   </div>
 </header>
@@ -506,6 +507,31 @@ function pushThinking(meta, text){
   while(thinkingPane.childElementCount > 200) thinkingPane.removeChild(thinkingPane.lastChild);
 }
 
+function beep(freq, dur, vol){
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = freq;
+    osc.type = 'sine';
+    gain.gain.value = vol || 0.08;
+    osc.start(); osc.stop(ctx.currentTime + (dur||0.15));
+  } catch(e){} // audio not supported
+}
+let _muted = localStorage.getItem('soundMuted')==='1';
+function playSound(type){
+  if(_muted) return;
+  if(type==='done'){ beep(660,0.12); setTimeout(()=>beep(880,0.2),140); }
+  else if(type==='store'){ beep(520,0.08); }
+}
+function toggleSound(){
+  _muted = !_muted;
+  localStorage.setItem('soundMuted', _muted ? '1' : '0');
+  const btn = $('sound-btn');
+  if(btn) btn.textContent = _muted ? '🔇' : '🔔';
+}
+
 function applyEvent(ev){
   if(ev.type === 'run_start'){
     state.startedAt = (Date.now()/1000) - (ev.elapsed||0);
@@ -602,6 +628,7 @@ function applyEvent(ev){
   if(ev.type === 'dataset_stored'){
     state.stored += 1;
     $('kpi-stored').textContent = state.stored;
+    playSound('store');
     if(ev.is_mainstream) state.mainstream += 1; else state.alternative += 1;
     $('kpi-ratio').textContent = `${state.mainstream} : ${state.alternative}`;
     pushFinding(ev.dataset || {});
@@ -611,6 +638,7 @@ function applyEvent(ev){
   if(ev.type === 'run_complete'){
     $('live').textContent = 'done';
     $('live').classList.remove('live');
+    playSound('done');
     pushRow('store', '✅', `Run complete · ${ev.status||''} · ${ev.stored||0} stored`, ev);
     return;
   }
@@ -656,6 +684,11 @@ $('model-select').addEventListener('change', (e) => {
 });
 loadModels();
 setInterval(loadModels, 30000);  // refresh in case the user pulls a new model
+
+(function initSound(){
+  const btn = $('sound-btn');
+  if(btn && _muted) btn.textContent = '🔇';
+})();
 
 function connect(){
   const es = new EventSource('/events');
