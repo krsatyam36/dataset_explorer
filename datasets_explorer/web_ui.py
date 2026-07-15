@@ -362,7 +362,7 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
 
 <main>
   <section class="panel">
-    <h2>Live activity feed <span class="count" id="stream-count">0</span></h2>
+    <h2>Live activity feed <span class="count" id="stream-count">0</span> <span id="scroll-status" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--warn);display:none">⏸ paused</span></h2>
     <div class="body stream" id="stream"></div>
   </section>
   <section>
@@ -459,11 +459,17 @@ function createAutoScrollBtn(){
   document.body.appendChild(autoScrollBtn);
 }
 stream.addEventListener('scroll', () => {
-  if(!state.autoScroll) return;
   const distFromBottom = stream.scrollHeight - stream.scrollTop - stream.clientHeight;
-  if(distFromBottom > 100){
+  const scrollStatus = $('scroll-status');
+  if(distFromBottom > 100 && state.autoScroll){
     state.autoScroll = false;
     if(autoScrollBtn) autoScrollBtn.style.display = 'block';
+    if(scrollStatus) scrollStatus.style.display = 'inline';
+  }
+  if(distFromBottom < 30 && !state.autoScroll){
+    state.autoScroll = true;
+    if(autoScrollBtn) autoScrollBtn.style.display = 'none';
+    if(scrollStatus) scrollStatus.style.display = 'none';
   }
 });
 createAutoScrollBtn();
