@@ -493,6 +493,9 @@ function clearFilter(){
 }
 $('filter-input').addEventListener('input', applyFilter);
 $('filter-source').addEventListener('change', applyFilter);
+document.addEventListener('keydown', e => {
+  if((e.ctrlKey||e.metaKey) && e.key==='f'){ e.preventDefault(); $('filter-input').focus(); }
+});
 
 function pushFinding(d){
   const score = (d.relevance_score ?? 0).toFixed(2);
