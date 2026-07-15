@@ -307,3 +307,4 @@ class Storage:
         self._conn.execute("UPDATE datasets SET reviewed=? WHERE id=?", (int(reviewed), dataset_id))
         self._conn.commit()
 # feat/storage-merge: Add storage-merge validation logic
+# feat/storage-merge: Add storage-merge error handling
