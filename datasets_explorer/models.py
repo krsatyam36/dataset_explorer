@@ -34,6 +34,7 @@ class DatasetSource(str, Enum):
 
 
 class Dataset(BaseModel):
+    reproducibility_score: Optional[float] = None  # 0-1: how reproducible (has code + data + instructions)
     id: Optional[int] = None
     name: str
     url: str
