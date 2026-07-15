@@ -244,8 +244,8 @@ INDEX_HTML = r"""<!doctype html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="theme-color" content="#0b0e14" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%237aa2f7'/><text x='16' y='22' font-size='18' fill='%230b0e14' text-anchor='middle' font-family='sans-serif' font-weight='bold'>DS</text></svg>" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230b0e14'/><text x='16' y='22' font-size='18' fill='%237aa2f7' text-anchor='middle' font-family='sans-serif' font-weight='bold'>DS</text></svg>" media="(prefers-color-scheme:dark)" />
 <title>dataset_search · live</title>
 <style>
 :root{
