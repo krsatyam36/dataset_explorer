@@ -18,6 +18,8 @@ from .config import (
     PHASE_A_MIN_STORES,
     PHASE_A_MIN_PORTAL_SEARCHES,
     PORTAL_HOSTS,
+    OLLAMA_HOST,
+    SEMANTIC_RERANK,
 )
 from .models import Dataset, DatasetSource
 from .storage import Storage
@@ -376,6 +378,29 @@ class ToolExecutor:
             self._csv_fh = None
             self._csv_writer = None
 
+    def _semantic_rerank(self, query: str, results: list[dict], top_k: int = 8) -> list[dict]:
+        if not SEMANTIC_RERANK or not results:
+            return results
+        try:
+            import numpy as np
+            import ollama
+            client = ollama.Client(host=OLLAMA_HOST)
+            q_emb = client.embeddings(model="nomic-embed-text", prompt=query)["embedding"]
+            for r in results:
+                text = f"{r.get('title','')} {r.get('snippet','')} {r.get('url','')}"
+                r_emb = client.embeddings(model="nomic-embed-text", prompt=text[:512])["embedding"]
+                q_arr = np.array(q_emb, dtype=np.float32)
+                r_arr = np.array(r_emb, dtype=np.float32)
+                dot = float(np.dot(q_arr, r_arr))
+                nq = float(np.linalg.norm(q_arr))
+                nr = float(np.linalg.norm(r_arr))
+                r["_semantic_score"] = dot / (nq * nr) if nq and nr else 0.0
+            results.sort(key=lambda x: x.get("_semantic_score", 0), reverse=True)
+            return results[:top_k]
+        except Exception as exc:
+            logger.warning(f"Semantic rerank failed: {exc}")
+            return results[:top_k]
+
     def execute(self, tool_name: str, tool_input: dict) -> Any:
         dispatch = {
             "web_search": self._web_search,
@@ -676,6 +701,8 @@ class ToolExecutor:
         ql = query.lower()
         if any(("site:" + h) in ql or ("site:www." + h) in ql for h in PORTAL_HOSTS):
             self._portal_search_count += 1
+        if SEMANTIC_RERANK:
+            ddg_results = self._semantic_rerank(query, ddg_results)
         return ddg_results
 
     def _fetch_page(self, inp: dict) -> dict:

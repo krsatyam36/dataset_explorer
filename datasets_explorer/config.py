@@ -48,6 +48,11 @@ MAINSTREAM_BALANCE_RATIO = 2
 # (no site:/filetype:/inurl:) web_search calls, the next broad call is rejected.
 MAX_CONSECUTIVE_BROAD_QUERIES = 2
 
+# Enables semantic reranking of web search results using Ollama embeddings.
+# When True, search results are scored by cosine similarity to the query
+# and only the top results are returned. Adds ~1s per search.
+SEMANTIC_RERANK = os.environ.get("SEMANTIC_RERANK", "0").strip() in ("1", "true", "yes")
+
 # Optional Brave Search API key. If set, web_search falls back to Brave when
 # DuckDuckGo errors or returns nothing. Get a free key at https://api.search.brave.com/.
 BRAVE_API_KEY = os.environ.get("BRAVE_API_KEY", "").strip()
