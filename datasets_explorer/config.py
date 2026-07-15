@@ -52,6 +52,9 @@ MAX_CONSECUTIVE_BROAD_QUERIES = 2
 # DuckDuckGo errors or returns nothing. Get a free key at https://api.search.brave.com/.
 BRAVE_API_KEY = os.environ.get("BRAVE_API_KEY", "").strip()
 
+# Maximum pages to scrape from Brave search results.
+BRAVE_MAX_PAGES = int(os.environ.get("BRAVE_MAX_PAGES", "3"))
+
 # Phase-A gate: research tools (arxiv_search, read_pdf) are blocked until either
 # the agent has stored this many datasets, OR has issued this many distinct
 # portal-targeted web_search calls. Forces portal-first behavior.

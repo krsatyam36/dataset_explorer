@@ -18,6 +18,7 @@ from .config import (
     PHASE_A_MIN_STORES,
     PHASE_A_MIN_PORTAL_SEARCHES,
     PORTAL_HOSTS,
+    BRAVE_MAX_PAGES,
 )
 from .models import Dataset, DatasetSource
 from .storage import Storage
