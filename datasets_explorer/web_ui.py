@@ -362,7 +362,7 @@ footer{padding:8px 22px;color:var(--muted);font-size:11px;border-top:1px solid v
 
 <main>
   <section class="panel">
-    <h2>Live activity feed <span class="count" id="stream-count">0</span></h2>
+    <h2>Live activity feed <span class="count" id="stream-count">0</span> <input id="stream-filter" placeholder="🔍 Filter…" style="background:var(--panel-2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:10px;padding:2px 6px;outline:none;width:120px;margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0" /></h2>
     <div class="body stream" id="stream"></div>
   </section>
   <section>
@@ -407,6 +407,7 @@ const KIND_OF = {
 
 const $ = (id) => document.getElementById(id);
 const stream = $('stream'), findings = $('findings'), thinkingPane = $('thinking');
+let _streamFilter = '';
 const sitesPane = $('sites');
 
 const state = {
@@ -444,6 +445,13 @@ function renderSites(){
   sitesPane.innerHTML = sorted.map(([h,n]) =>
     `<span class="chip">${h} <span class="n">${n}</span></span>`).join('');
   $('sites-count').textContent = state.sites.size;
+}
+
+function applyStreamFilter(){
+  _streamFilter = ($('stream-filter').value||'').toLowerCase();
+  stream.querySelectorAll('.row').forEach(r => {
+    r.style.display = (!_streamFilter || r.textContent.toLowerCase().includes(_streamFilter)) ? '' : 'none';
+  });
 }
 
 function pushRow(kind, ic, html, meta){
@@ -656,6 +664,9 @@ $('model-select').addEventListener('change', (e) => {
 });
 loadModels();
 setInterval(loadModels, 30000);  // refresh in case the user pulls a new model
+
+const sf = $('stream-filter');
+if(sf) sf.addEventListener('input', applyStreamFilter);
 
 function connect(){
   const es = new EventSource('/events');
